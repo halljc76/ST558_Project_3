@@ -1,6 +1,6 @@
 ## ST 558 Project 3: Analysis of Diabetes Data
 
-**Group Members**: [Carter Hall](mailto:jchall6@ncsu.edu), [Amber Locklear](mailto:alockle7@ncsu.edu)
+**Group Members**: [Carter Hall](mailto:jchall6@ncsu.edu), [Autumn Locklear](mailto:alockle7@ncsu.edu)
 
 ### Description of Repository
 
