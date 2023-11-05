@@ -1,0 +1,122 @@
+---
+title: "ST 558 Project 3 Analysis"
+author: "Carter Hall"
+date: "2023-11-05"
+output: github_document
+params:
+  Education: "Middle or Less"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(readr)
+library(dplyr)
+library(caret)
+```
+
+```{r rendering, include=FALSE}
+#' Include rmarkdown::render code from lecture slides to iterate through the 
+#' levels of education (supplied below). 
+#' 
+#' Not sure if the params is needed in the YAML header a priori to running
+#' code in this chunk, but it may not *hurt*, especially as a way to check!
+#' 
+#' Also not sure if this for loop will work :p
+for (educ_level in c("Middle or Less", "Some High", "High School Graduate",
+                     "Some College", "College_Graduate")) {
+rmarkdown::render("./main.Rmd", output_file = paste0(tolower(gsub(" ", "_",
+                                                                  x = educ_level)
+                                                             ),
+                                                     ".html"
+                                                     ),
+                  params = list(Education = educ_level)
+                  )
+}
+```
+
+
+# Introduction
+
+# Data
+
+```{r}
+# Importing the Data
+diab <- read_csv("diabetes_binary_health_indicators_BRFSS2015.csv")
+
+#' Context on the `Education` variable:
+#' 1 := Never attended school or at most kindergarten
+#' 2 := Grades 1-8   [1 and 2 Renamed to Group 1]
+#' 3 := Grades 9-11          [Renamed to Group 2]
+#' 4 := Grade 12 or GED      [Renamed to Group 3]
+#' 5 := 1-3 Years of College [Renamed to Group 4]
+#' 6 := 4+ Years of College  [Renamed to Group 5]
+
+# Preprocessing Education Groups by Combining 1 and 2
+diab <- diab %>% mutate(
+  Education = case_when(
+    Education %in% c(1,2) ~ "Middle or Less",
+    Education == 3 ~ "Some High",
+    Education == 4 ~ "High School Graduate",
+    Education == 5 ~ "Some College",
+    Education == 6 ~ "College Graduate"
+  ),
+  Sex = factor(x = Sex, levels = c(0,1), labels = c("Female", "Male")),
+  DiffWalk = factor(x = DiffWalk, levels = c(0,1), labels = c("No", "Yes")),
+  GenHlth = factor(x = GenHlth, levels = 1:5,
+                   labels = c("Excellent", "Very Good", "Good", "Fair", "Poor")),
+  NoDocbcCost = factor(NoDocbcCost, levels = c(0,1), labels = c("No", "Yes")),
+  AnyHealthcare = factor(AnyHealthcare, levels = c(0,1), labels = c("No", "Yes")),
+  HvyAlcoholConsump = factor(HvyAlcoholConsump, levels = c(0,1), labels = c("No", "Yes")),
+  HighBP = factor(HighBP, levels = c(0,1), labels = c("No", "Yes")),
+  HighChol = factor(HighChol, levels = c(0,1), labels = c("No", "Yes")),
+  CholCheck = factor(CholCheck, levels = c(0,1), labels = c("No", "Yes")),
+  Smoker = factor(Smoker, levels = c(0,1), labels = c("No", "Yes")),
+  Stroke = factor(Stroke, levels = c(0,1), labels = c("No", "Yes")),
+  HeartDiseaseorAttack = factor(HeartDiseaseorAttack, levels = c(0,1), labels = c("No", "Yes")),
+  PhysActivity = factor(PhysActivity,levels = c(0,1), labels = c("No", "Yes")),
+  Fruits = factor(Fruits, levels = c(0,1), labels = c("No", "Yes")),
+  Veggies = factor(Veggies, levels = c(0,1), labels = c("No", "Yes")),
+  Age = factor(Age, levels = c(1:14),
+               labels = c("18-24","25-29","30-34","35-39","40-44","45-49","50-54",
+                          "55-59","60-64","65-69","70-74","75-79","80+",NA))
+)
+
+diab_subset <- diab %>% filter(Education == params$Education)
+```
+
+
+# Summarizations
+
+# Modeling
+
+## Reproducible Train/Test Split
+
+Consider the below code chunk to partition the data into *train* and *test* datasets
+based on a 70-30 split.
+
+```{r}
+# 70% <=> p = 0.7
+indices <- createDataPartition(1:nrow(diab_subset), p = 0.7,list = F) 
+train   <- diab_subset[indices,]
+test    <- diab_subset[-indices,]
+```
+
+## Discussion of Candidate Models and Related Items
+
+### "Log Loss" -- Why Use it in Statistical Modeling?
+
+### Logistic Regression Models
+
+### LASSO Regression Model
+
+### Classification Tree Model
+
+### Random Forest Model
+
+### "New" Models
+
+#### New Model 1: 
+
+#### New Model 2:
+
+# Final Model Selection
