@@ -37,6 +37,7 @@ rmarkdown::render("./main.Rmd", output_file = paste0(tolower(gsub(" ", "_",
 
 # Introduction
 
+The following analysis uses a subset of data from the 2015 Behavioral Risk Factor Surveillance System (BRFSS). The dataset consists of three files with survey responses pertaining to diabetes.
 # Data
 
 ```{r}
