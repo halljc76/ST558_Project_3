@@ -104,7 +104,40 @@ test    <- diab_subset[-indices,]
 
 ## Discussion of Candidate Models and Related Items
 
-### "Log Loss" -- Why Use it in Statistical Modeling?
+### Log Loss vs Accuracy
+
+Consider a vector $\pmb{Y} = (y_1,...,y_n)$ of $n$ true labels/classes for $n$ data points in a testing set, and consider a classification model attempting to identify data as belonging to a particular class. Because the task of classification is a *supervised* one, wherein we supply *labeled* features to a model, it stands to reason that we desire a model that classifies well on both training data and unseen data. This idea, referred to as **generalization**, implies that a model could be trained to near-perfection on supplied observations but fail miserably when applied in new scenarios! 
+
+To aid this process of generalization, statisticians introduce the concept of *loss* into the model-training process; in essence, loss asks the question
+> How far off am I, the model, from ground truth?
+
+To mathematically *quantify* loss and *minimize* it is as much of an art as it is pure mathematics -- consider questions such as 
+
+- **Are all misclassifications treated equally?** (Consider a false negative diagnosis to a cancer patient, versus a false positive for a light bulb factory.)
+
+- **How should a model be penalized, or have its parameters adjusted, for a misclassification?** (This question lends itself to a discussion of algorithms such as **gradient descent** and **stochastic gradient descent**, wherein we generally want to avoid reaching a local minima of a loss function for which there are sets of [hyper-]parameters that yield better classification and generalization. Consider also the regression analog of this question yielded methods such as the LASSO (Tibshirani, 1996).)
+
+For this discussion, we refer to loss functions $\mathcal{L}(y_i, p_i)$ as being **non-negative definite**, i.e., $\mathcal{L}(y_i, p_i)\geq 0 \forall y_i$. 
+
+Consider two of the more simpler functions used to evaluate classification models, **log loss** (also known as cross-entropy loss) and **accuracy**. In a binary setting, we define the log loss obtained from predicting an observation to belong to the "positive" class with probability $p_i \in (0,1)$ and true label $y_i \in \{0,1\}$ as 
+$$ \mathcal{L}(y_i, p_i) = -[y_i \ln(p_i) + (1-y_i)\ln(1-p_i)] $$
+If we adopted similar notation, the **accuracy** loss function, defined with parameters $y_i \in \{0,\1}$ as the true label and $\hat{y}_i \in \{0,1\}$ as the predicted label, wherein we might define 
+$$ \hat{y}_i = \begin{cases} 1 & p_i > c \\ 0 & p_i \leq c \end{cases} $$ 
+such that we declare the model as predicting the observation belonging to the positive class iff the probability at which it does so exceeds some threshold $c \in [0,1]$ (i.e., $c = 0.5$). We then define accuracy for the $i$-th observation as
+$$ \mathcal{L}(y_i, \hat{y_i}) = \mathbb{I}(y_i = \hat{y}_i) $$
+with $\mathbb{I}$ the indicator function, such that
+$$ \text{Accuracy} = \frac{1}{N}\sum_{i=1}^{N} \mathcal{L}(y_i, \hat{y}_i) $$ 
+
+The question, naturally, is 
+> What's the difference between log-loss and accuracy?
+
+The preference of the former lies in the harsher *penalization* by the accuracy metric in incorrect cases. For example, consider a case where the true label is $1$, a positive classification; even if the model emits a positive classification with probability $p_i = c - \epsilon$ for some small $\epsilon > 0$, the accuracy metric regards this as incorrect, no matter how close the model was to the truth! Because the log loss function is differentiable, we can iteratively update the hyperparameters of a classification model in the training process, applying more drastic adjustments when the model predicts the incorrect class with greater certainty. 
+
+In a more cross-validation perspective, wherein we might supply a discretized grid of tuning parameters, we can better understand the landscape of our multi-dimensional loss function by identifying which parameter adjustments elicit the largest changes in log-loss! An accuracy metric, as mentioned earlier, may fail to capture the more fine discrepancies between sets of parameters. (Consider the multi-class loss function below, where we now define $y_i \in \{0,1\}$ as representing class $i \in \{1,2,...,n\}$ to be the true class.)
+
+$$ \mathcal{L}(y_i,p_i) = -\sum_{i=1}^{n} y_i \ln(p_i) $$
+
+**This** ability to adjust parameters and view the effects of these adjustments is why log-loss is preferred to accuracy in many machine learning applications as a means of evaluating the performance of classification models!  
 
 ### Logistic Regression Models
 
