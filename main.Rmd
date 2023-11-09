@@ -3,15 +3,16 @@ title: "ST 558 Project 3 Analysis"
 author: "Carter Hall"
 date: "2023-11-05"
 output: github_document
-params:
-  Education: "Middle or Less"
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+```{r include=FALSE}
 library(readr)
 library(dplyr)
+library(tidyr)
+library(ggplot2)
 library(caret)
+library(cowplot)
+library(gridExtra)
 set.seed(558)
 ```
 
@@ -19,10 +20,7 @@ set.seed(558)
 #' Include rmarkdown::render code from lecture slides to iterate through the 
 #' levels of education (supplied below). 
 #' 
-#' Not sure if the params is needed in the YAML header a priori to running
-#' code in this chunk, but it may not *hurt*, especially as a way to check!
-#' 
-#' Also not sure if this for loop will work :p
+#' This might have to be moved to a different file! :)
 for (educ_level in c("Middle or Less", "Some High", "High School Graduate",
                      "Some College", "College_Graduate")) {
 rmarkdown::render("./main.Rmd", output_file = paste0(tolower(gsub(" ", "_",
@@ -80,7 +78,10 @@ diab <- diab %>% mutate(
   Veggies = factor(Veggies, levels = c(0,1), labels = c("No", "Yes")),
   Age = factor(Age, levels = c(1:14),
                labels = c("18-24","25-29","30-34","35-39","40-44","45-49","50-54",
-                          "55-59","60-64","65-69","70-74","75-79","80+",NA))
+                          "55-59","60-64","65-69","70-74","75-79","80+",NA)),
+  Income = factor(Income, levels = c(1:9)),
+  PhysHlth = factor(Income, levels = c(1:30)),
+  MentHlth = factor(MentHlth, levels = c(1:30))
 )
 
 diab_subset <- diab %>% filter(Education == params$Education)
@@ -88,6 +89,52 @@ diab_subset <- diab %>% filter(Education == params$Education)
 
 
 # Summarizations
+
+In determining the evaluation of potentially significant variables for predicting a response, the first phase is often getting an understanding for the data. This section focused on **Exploratory Data Analysis** will offer some automated graphs that describe the relationship between variables of-interest while offering insight into how statisticians and audiences outside of statistics might read the graph to glean information.
+
+## Univariate Visualizations of Categorical Variables
+
+As the preprocessing for this dataset included the recasting of much of the raw data into *factors*, we might be interested in the relative frequencies of many of the levels of our categorical variables. From the many, many graphs below, we can obtain some summary information about the shape of our variables' distributions and the similarities and differences between the proportion of respondents who have Diabetes and the proportions of respondents who have a certain income (see the `Income` variable) or certain food intake (see the `Fruits` and `Veggies` Variables).
+
+```{r}
+cat_summ <- diab_subset %>% select(where(is.factor)) %>% 
+  pivot_longer(cols = colnames(.)) %>%
+  table() %>% as.data.frame(.) %>% mutate(
+    isValidLevel = apply(., 1, function(x) {
+  return( as.list(x)$value %in% unique(diab_subset[[as.list(x)$name]]) )
+  })
+  ) %>% filter(isValidLevel) %>% select(-isValidLevel) 
+
+cat_plots <- lapply(unique(cat_summ$name), 
+                    function(x) {
+                      temp <- cat_summ %>% filter(name == x)
+                      return(
+                        ggplot(data = temp,
+                               aes(x = value, y = Freq)) + 
+                          geom_bar(
+                            stat = "identity"
+                        ) + labs(title = 
+                                   paste0(temp$name),
+                                 subtitle = paste0("N = ", nrow(temp)),
+                                 y = "Count",
+                                 x = "Response"
+                                 ) +
+                          theme_bw()
+                      )
+                    })
+```
+
+```{r}
+grid.arrange(grobs = cat_plots[1:4], nCol = 2)
+grid.arrange(grobs = cat_plots[5:8], nCol = 2)
+grid.arrange(grobs = cat_plots[9:12], nCol = 2)
+grid.arrange(grobs = cat_plots[13:16], nCol = 2)
+grid.arrange(grobs = cat_plots[17:19], nCol = 2)
+```
+
+## Summarization 2
+
+## Summarization 3
 
 # Modeling
 
@@ -141,6 +188,38 @@ $$ \mathcal{L}(y_i,p_i) = -\sum_{i=1}^{n} y_i \ln(p_i) $$
 **This** ability to adjust parameters and view the effects of these adjustments is why log-loss is preferred to accuracy in many machine learning applications as a means of evaluating the performance of classification models!  
 
 ### Logistic Regression Models
+
+#### Description
+For Logistic Regression, consider labels $Y \in \{0,1\}$, where these values encode "failure/success" in a binary sense. Predictions $\hat{Y} \in \{0,1\}$ by definition, and so we might model success probability via
+$$ P(Y|X) = \frac{e^{\beta_0 + \beta_1 x}}{1 + e^{\beta_0 + \beta_1 x}} $$
+where the RHS is the **logistic function**. The **link function** in logistic regression is given by
+$$ g(\mu) = \beta_0 + \beta_1 x_1 + ... + \beta_p x_p  $$ 
+where $\mu$ is the mean for the set of $x$-values used. (Note $g(\mu) = \mu$ for standard linear regression, which is called the *identity link* s.t. the value predicted is mean response given $X$.)
+
+However, there is no closed form solution used to fit $\beta_0,\beta_1$, and so MLE often used to fit parameter. What instead we might do is write the **logit function** or **log-odds function**
+$$ \ln\Big(\frac{P(Y|X)}{1-P(Y|X)}\Big) = \beta_0 + \beta_1 X  $$
+which is linear in the parameters and offers a more intuitive explanation and interpretation of coefficients (e.g., $\beta_1$ is now a change in log-odds of success).
+
+In a *multi-class* scenario, wherein $Y$ takes on more than two values, and when $\pmb{X} = (1, x_1,...,x_p)$ is more than one predictor, consider that
+$$ P(Y|\pmb{X}) = \frac{e^{\beta_0 + \beta_1 x_1 + ... + \beta_p x_p}}{1 + e^{\beta_0 + \beta_1 x_1 + ... + \beta_p x_p}} = \frac{e^{\pmb{\beta}\pmb{X}}}{1 + e^{\pmb{\beta}\pmb{X}}} $$ 
+and the logit function then becomes
+$$ \ln\Big(\frac{P(Y|\pmb{X})}{1-P(Y|\pmb{X})}\Big) = \pmb{\beta}\pmb{X} $$
+with $\pmb{\beta} = \begin{bmatrix} \beta_0 & \beta_1 & ... & \beta_p \end{bmatrix}$.
+
+#### Why Use in Classification?
+
+With this type of data, we consider logistic regression as a candidate modeling procedure because of a multitude of reasons, including
+
+1. **Ability to Handle Nonlinear Relationships**: Logistic regression is built on the idea that there could be a nonlinear relationship between the class and features; feature engineering can also easily be incorporated when parameterizing a logistic regression model with candidate predictors.
+
+2. **Ease of Interpretation**: The interpreted values from a logistic regression model are by nature the *probability of that observation belong to a positive class* (binary) *or to that particular class* (multi-class problem, wherein each model predicts for a single class and the predictions for each individual model are aggregated via maximums to obtain a single prediction for the observation).
+
+#### Fitting of Candidate Logistic Regression Models
+
+```{r}
+
+```
+
 
 ### LASSO Regression Model
 
