@@ -3,6 +3,7 @@ title: "ST 558 Project 3 Analysis"
 author: "Carter Hall"
 date: "2023-11-05"
 output: github_document
+  html_preview: false
 ---
 
 ```{r include=FALSE}
@@ -224,6 +225,8 @@ With this type of data, we consider logistic regression as a candidate modeling 
 ### LASSO Regression Model
 
 ### Classification Tree Model
+
+A classification tree is a tree-based method that splits the data into groups or regions. 
 
 ### Random Forest Model
 
