@@ -14,7 +14,29 @@ library(ggplot2)
 library(caret)
 library(cowplot)
 library(gridExtra)
+library(rmarkdown)
 set.seed(558)
+```
+
+```{r, include=FALSE}
+#Create a data frame that has file names to output to and a list with each education level for using in render()
+#Get unique education levels
+eduLevels <- unique(diab$Education)
+#create filenames
+output_file <- paste0(eduLevels, ".md")
+#create a list for each level 
+params = lapply(eduLevels, FUN = function(x){list(educ_level = x)})
+
+#put into a data frame
+reports <- tibble(output_file, params)
+```
+
+```{r rendering2, include=FALSE}
+#knit using apply()
+apply(reports, MARGIN = 1,
+      FUN = function(x){
+        render(input = "./main.Rmd", output_file = x[[1]], params = x[[2]])
+      })
 ```
 
 ```{r rendering, include=FALSE}
