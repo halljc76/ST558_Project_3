@@ -15,7 +15,7 @@ library(ggplot2)
 library(caret)
 library(cowplot)
 library(gridExtra)
-library(rmarkdown)
+library(caret)
 set.seed(558)
 ```
 
@@ -226,15 +226,23 @@ With this type of data, we consider logistic regression as a candidate modeling 
 
 ### LASSO Regression Model
 The lasso performs variable selection. It yields *sparse* models that only involve a subset of the variables. The lasso is more resistant to outliers than linear regression. The purpose of the lasso model is to prevent overfitting.
+```{r}
+
+```
 
 ### Classification Tree Model
 
 A classification tree is a tree-based method that splits the data into groups or regions. 
 ```{r}
+control <- trainControl(method="cv", number=5, classProbs=TRUE, summaryFunction=mnLogLoss)
 #set seed before training
 set.seed(50)
 
-classTreeFit <-train()
+classTreeFit <-train(Diabetes_binary ~ .,
+                     data = train,
+                     method = "rpart",
+                     preProcess = c("center", "scale"),
+                     trControl =  control)
 
 ```
 
