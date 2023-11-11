@@ -3,7 +3,8 @@ title: "ST 558 Project 3 Analysis"
 author: "Carter Hall"
 date: "2023-11-05"
 output: github_document
-  html_preview: false
+params:
+  Education: "Middle or Less"
 ---
 
 ```{r include=FALSE}
@@ -18,28 +19,7 @@ library(rmarkdown)
 set.seed(558)
 ```
 
-```{r, include=FALSE}
-#Create a data frame that has file names to output to and a list with each education level for using in render()
-#Get unique education levels
-eduLevels <- unique(diab$Education)
-#create filenames
-output_file <- paste0(eduLevels, ".md")
-#create a list for each level 
-params = lapply(eduLevels, FUN = function(x){list(educ_level = x)})
-
-#put into a data frame
-reports <- tibble(output_file, params)
-```
-
-```{r rendering2, include=FALSE}
-#knit using apply()
-apply(reports, MARGIN = 1,
-      FUN = function(x){
-        render(input = "./main.Rmd", output_file = x[[1]], params = x[[2]])
-      })
-```
-
-```{r rendering, include=FALSE}
+```{r rendering, eval=FALSE}
 #' Include rmarkdown::render code from lecture slides to iterate through the 
 #' levels of education (supplied below). 
 #' 
@@ -245,10 +225,19 @@ With this type of data, we consider logistic regression as a candidate modeling 
 
 
 ### LASSO Regression Model
+The lasso performs variable selection. It yields *sparse* models that only involve a subset of the variables. The lasso is more resistant to outliers than linear regression. The purpose of the lasso model is to prevent overfitting.
 
 ### Classification Tree Model
 
 A classification tree is a tree-based method that splits the data into groups or regions. 
+```{r}
+#set seed before training
+set.seed(50)
+
+classTreeFit <-train()
+
+```
+
 
 ### Random Forest Model
 
