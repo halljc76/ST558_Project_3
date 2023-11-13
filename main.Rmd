@@ -228,6 +228,16 @@ With this type of data, we consider logistic regression as a candidate modeling 
 The lasso performs variable selection. It yields *sparse* models that only involve a subset of the variables. The lasso is more resistant to outliers than linear regression. The purpose of the lasso model is to prevent overfitting.
 ```{r}
 
+control <- trainControl(method="cv", number=5, classProbs=TRUE, summaryFunction=mnLogLoss)
+
+set.seed(100)
+
+lassoFit <- train(Diabetes_binary ~ .,
+                     data = train,
+                     method = "glmnet",
+                     preProcess = c("center", "scale"),
+                     metric = "logLoss",
+                     trControl =  control)
 ```
 
 ### Classification Tree Model
