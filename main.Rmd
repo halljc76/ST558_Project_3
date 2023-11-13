@@ -63,6 +63,7 @@ diab <- diab %>% mutate(
     Education == 5 ~ "Some College",
     Education == 6 ~ "College Graduate"
   ),
+  Diabetes_binary = factor(x = Diabetes_binary, levels = c(0,1), labels = c("No Diabetes", "Diabetes")),
   Sex = factor(x = Sex, levels = c(0,1), labels = c("Female", "Male")),
   DiffWalk = factor(x = DiffWalk, levels = c(0,1), labels = c("No", "Yes")),
   GenHlth = factor(x = GenHlth, levels = 1:5,
@@ -132,12 +133,35 @@ grid.arrange(grobs = cat_plots[1:4], nCol = 2)
 grid.arrange(grobs = cat_plots[5:8], nCol = 2)
 grid.arrange(grobs = cat_plots[9:12], nCol = 2)
 grid.arrange(grobs = cat_plots[13:16], nCol = 2)
-grid.arrange(grobs = cat_plots[17:19], nCol = 2)
+grid.arrange(grobs = cat_plots[17:20], nCol = 2)
 ```
 
 ## Summarization 2
+```{r}
+tab <- table(diab_subset$Diabetes_binary,
+             diab_subset$Fruits)
+tab
+
+
+tab1 <- table(diab_subset$Diabetes_binary,
+              diab_subset$HighChol)
+tab1
+```
+
 
 ## Summarization 3
+```{r}
+g <- ggplot(data = diab_subset, aes(x = diab_subset$HighChol))
+g + geom_bar(aes(fill = diab_subset$Diabetes_binary))
+
+g2 <-ggplot(data = diab_subset, aes(x= diab_subset$Fruits))
+g2 + geom_bar(aes(fill= diab_subset$Diabetes_binary))
+```
+
+##Summarization 4
+```{r}
+
+```
 
 # Modeling
 
