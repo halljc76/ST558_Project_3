@@ -239,13 +239,14 @@ With this type of data, we consider logistic regression as a candidate modeling 
 #### Fitting of Candidate Logistic Regression Models
 
 ```{r}
-control <- trainControl(method="cv", number=5, classProbs=TRUE, summaryFunction=mnLogLoss)
+control <- trainControl(method="cv", number=5, classProbs=TRUE, summaryFunction=twoClassSummary)
 logreg1 <- train(Diabetes_binary ~ .,
                  data= train %>% select(-Education),
                  family = "binomial",
                  method = "glmnet",
                  metric = "logLoss",
-                 trControl = control)
+                 trControl = control
+                 )
 logreg2 <- train(Diabetes_binary ~ AnyHealthcare + 
                  GenHlth + MentHlth + PhysHlth + AnyHealthcare*GenHlth + Smoker,
                  data=train, 
@@ -287,14 +288,16 @@ lr3CM <- confusionMatrix(as.factor(logreg3Pred),
 getAccSenSpec <- function(c) {
   return(data.frame(c$overall["Accuracy"],
          c$byClass["Sensitivity"],
-         c$byClass["Specificity"]))
+         c$byClass["Specificity"],
+         c$overall["Kappa"]))
 }
 
 logregResults <- sapply(list(lr1CM, lr2CM, lr3CM), 
        function(x) {
          getAccSenSpec(x)
        })
-row.names(logregResults) <- c("Accuracy", "Sensitivity", "Specificity")
+row.names(logregResults) <- c("Accuracy", "Sensitivity", "Specificity", 
+                              "Kappa")
 colnames(logregResults) <- c("LR1", "LR2", "LR3")
 # lr1CM
 # lr2CM
@@ -306,17 +309,11 @@ Because the focus of this model is health-based, it is reasonable to conclude th
 prioritizing a **lack of false negatives** (i.e., increasing sensitivity) is 
 a viable criterion on which to select a best model. Therefore, the candidate model
 chosen is that which has the highest sensitivity above (note LR1, LR2, and LR3
-refer to the respective first, second, or third logistic regression model).
+refer to the respective first, second, or third logistic regression model). Note that we might also consider which model has the highest Kappa, $\kappa$, which indicates the agreement of the test predictions to the test observations (the value should be closer to $+1$).
 
 ```{r}
-candidateLRModel <- ifelse(
-  which.max(logregResults[2,]) == 1,
-  logreg1,
-  ifelse( which.max(logregResults[2,]) == 2,
-          logreg2, logreg3)
-)
+candidateLRModel <- c(logreg1, logreg2, logreg3)[which.max(logregResults[2,])]
 ```
-
 
 ### LASSO Regression Model
 The lasso performs variable selection. It yields *sparse* models that only involve a subset of the variables. The lasso is more resistant to outliers than linear regression. The purpose of the lasso model is to prevent overfitting.
@@ -350,13 +347,122 @@ classTreeFit <-train(Diabetes_binary ~ .,
 
 #### Description
 
+A random forest, as its name implies, involves two things -- *trees* (lots of them) 
+and *randomness*. The idea behind a random forest model is to fit *multiple* trees,
+as in bagging, but consider a **random subset of predictors** in each tree fit.
+
+By convention, the cardinality of this random subset depends usually on the 
+task at-hand -- if $m$ denotes this cardinality and $p$ is the number of predictors,
+then either $m = \sqrt{p}$ (classification) or $m = p/3$ (regression). 
+
+For *regression trees*...
+1. Create a bootstrap sample (same size as actual sample) via `sample.`
+
+2. Train a tree of the specified number of predictors from `1` -- no pruning necessary. The prediction for a given set of $x$-values from this tree is then $\hat{y}^{*1}(x)$.
+
+3. Form $\hat{y}^{*j}(x)$ for $j = 1,..., B$ (e.g., $B = 1000$).
+
+4. Average to obtain
+$$ \hat{y}(x) = \frac{1}{B} \sum_{j=1}^{B} \hat{y}^{*j}(x) $$ 
+
+For a *classification tree*...
+1. Create a bootstrap sample (same size as actual sample) via `sample.`
+
+2. Train a tree of the specified number of predictors on the sample from `1` -- no pruning necessary. The prediction for a given set of $x$-values from this tree is then $\hat{y}^{*1}(x)$.
+
+3. Form $\hat{y}^{*j}(x)$ for $j = 1,..., B$ (e.g., $B = 1000$).
+
+4. (One option) Use the **majority vote** as the final classification prediction.
+
+To *evaluate* random forest methods, we use the **prediction error** (e.g., MSE), where for a test set having size $N$,
+$$ \text{MSE} = \frac{1}{N} \sum_{i} (y_i - \hat{y}_i)^2 = \text{Bias}^2 + \text{Variance} $$
+
+To *fit* bagging methods, use the `randomForest` package (bagging is equivalent to RF with $m = p$). Relevant parameters include `mtry` (number of predictors to try, either $\sqrt{p}$ or $p/3$ as above), `ntree` (number of trees to fit), `importance = TRUE` (return variable importance info such as `%IncMSE` and `IncNodePurity` through `varImpPlot()` -- more important variables having higher values here).
+
+**Note**: Bootstrap samples will leave out some observations from training, due to sampling w/ replacement! (On average, the method uses around 2/3 of the data.) The resulting leftovers, the **Out-of-bag (OOB)** observations, can be used for prediction! (To do this, use all bootstrap models that did *not* use this particular data point in training to predict it, and then appropriately average or obtain majority votes to make final predictions). This results in a final prediction error (OOB MSE) or classification error.
+
 #### Advantage of Random Forest over Basic Classification Tree
+
+The reason for utilizing random forests with is because if a really strong predictor exists, every bootstrap tree will likely use it as a first split, making the predictions more correlated (meaning a smaller reduction in variance from aggregation). This is opposed with a basic classification tree utilizes **all** predictors, which is not guaranteed to learn the more nuanced relationships overshadowed by splitting on the aforementioned more significant predictor.
 
 #### Fitting of Random Forest Model
 
-### "New" Models
+```{r}
+control <- trainControl(method="cv", number=5,
+                        classProbs=TRUE, summaryFunction=twoClassSummary)
+rfFit <- train(Diabetes_binary ~ ., 
+               data = train %>% select(-Education),
+               method = "rf",
+               metric = "logLoss",
+               trControl = control,
+               tuneGrid = expand.grid(mtry = c(1,3,5,7,10,15)))
+```
 
-#### New Model 1: 
+```{r}
+rfPred <- as.numeric(predict(rfFit, test,
+                       type = "prob")[,2] > 0.5)
+confMatRF <- confusionMatrix(as.factor(rfPred), 
+          as.factor(as.numeric(as.factor(test$Diabetes_binary)) - 1),
+          positive = "1")
+```
+
+```{r}
+rfResults <- sapply(list(confMatRF), 
+       function(x) {
+         getAccSenSpec(x)
+       })
+row.names(rfResults) <- c("Accuracy", "Sensitivity", "Specificity", "Kappa")
+colnames(rfResults) <- c("Random Forest")
+rfResults
+```
+
+The candidate random forest model is *the* model fitted above, as we only considered
+one model. Note the hyperparameters (i.e., `mtry`, the number of parameters used) that resulted in the best fit are given below.
+
+```{r}
+rfFit$bestTune
+```
+
+
+### "New" Models
+#### New Model 1: Naive Bayes Classifier
+
+##### Description
+
+[Do description of Naive Bayes]
+
+##### Fitting of Candidate Model
+
+```{r}
+control <- trainControl(method="cv", number=5,
+                        classProbs=TRUE, summaryFunction=mnLogLoss)
+naiveBayes <- train(
+  Diabetes_binary ~ .,
+  data = train %>% select(-Education),
+  method = "naive_bayes",
+  trControl = control,
+  metric = "logLoss"
+)
+```
+
+```{r}
+naiveBayesPred <- as.numeric(predict(naiveBayes, test,
+                       type = "prob")[,2] > 0.5)
+confMatNBC <- confusionMatrix(as.factor(naiveBayesPred), 
+          as.factor(as.numeric(as.factor(test$Diabetes_binary)) - 1),
+          positive = "1")
+```
+
+```{r}
+nbResults <- sapply(list(confMatNBC), 
+       function(x) {
+         getAccSenSpec(x)
+       })
+row.names(nbResults) <- c("Accuracy", "Sensitivity", "Specificity", "Kappa")
+colnames(nbResults) <- c("Naive Bayes")
+nbResults
+```
+
 
 #### New Model 2:
 
