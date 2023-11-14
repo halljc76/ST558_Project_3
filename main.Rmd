@@ -326,7 +326,34 @@ lassoFit <- train(Diabetes_binary ~ .,
                      method = "glmnet",
                      metric = "logLoss",
                      trControl =  control)
+
+lassoPred <- as.numeric(predict(lassoFit, test,
+                       type = "prob")[,2] > 0.5)
+confMatLASSO <- confusionMatrix(as.factor(lassoPred), 
+          as.factor(as.numeric(as.factor(test$Diabetes_binary)) - 1),
+          positive = "1")
+confMatLASSO
 ```
+
+Consider the accuracy, sensitivity, and specificity (among other related values) computed below.
+
+```{r}
+lassoResults <- sapply(list(confMatLASSO), 
+       function(x) {
+         getAccSenSpec(x)
+       })
+row.names(lassoResults) <- c("Accuracy", "Sensitivity", "Specificity", "Kappa")
+colnames(lassoResults) <- c("LASSO")
+lassoResults
+```
+
+The candidate random forest model is *the* model fitted above, as we only considered
+one model. Note the hyperparameters (i.e., `mtry`, the number of parameters used) that resulted in the best fit are given below.
+
+```{r}
+lassoFit$bestTune
+```
+
 
 ### Classification Tree Model
 
@@ -340,6 +367,32 @@ classTreeFit <-train(Diabetes_binary ~ .,
                      method = "rpart",
                      metric = "logLoss",
                      trControl =  control)
+
+classTreePred <- as.numeric(predict(classTreeFit, test,
+                       type = "prob")[,2] > 0.5)
+confMatCT <- confusionMatrix(as.factor(classTreePred), 
+          as.factor(as.numeric(as.factor(test$Diabetes_binary)) - 1),
+          positive = "1")
+confMatCT
+```
+
+Consider the accuracy, sensitivity, and specificity (among other related values) computed below.
+
+```{r}
+ctResults <- sapply(list(confMatCT), 
+       function(x) {
+         getAccSenSpec(x)
+       })
+row.names(ctResults) <- c("Accuracy", "Sensitivity", "Specificity", "Kappa")
+colnames(ctResults) <- c("Classification Tree")
+ctResults
+```
+
+The candidate random forest model is *the* model fitted above, as we only considered
+one model. Note the hyperparameters (i.e., `mtry`, the number of parameters used) that resulted in the best fit are given below.
+
+```{r}
+lassoFit$bestTune
 ```
 
 
@@ -404,7 +457,10 @@ rfPred <- as.numeric(predict(rfFit, test,
 confMatRF <- confusionMatrix(as.factor(rfPred), 
           as.factor(as.numeric(as.factor(test$Diabetes_binary)) - 1),
           positive = "1")
+confMatRF
 ```
+
+Consider the accuracy, sensitivity, and specificity (among other related values) computed below.
 
 ```{r}
 rfResults <- sapply(list(confMatRF), 
@@ -457,6 +513,7 @@ naiveBayesPred <- as.numeric(predict(naiveBayes, test,
 confMatNBC <- confusionMatrix(as.factor(naiveBayesPred), 
           as.factor(as.numeric(as.factor(test$Diabetes_binary)) - 1),
           positive = "1")
+confMatNBC
 ```
 
 ```{r}
