@@ -3,8 +3,6 @@ title: "ST 558 Project 3 Analysis"
 author: "Carter Hall"
 date: "2023-11-05"
 output: github_document
-params:
-  Education: "Middle or Less"
 ---
 
 ```{r include=FALSE}
@@ -19,27 +17,10 @@ library(caret)
 set.seed(558)
 ```
 
-```{r rendering, eval=FALSE}
-#' Include rmarkdown::render code from lecture slides to iterate through the 
-#' levels of education (supplied below). 
-#' 
-#' This might have to be moved to a different file! :)
-for (educ_level in c("Middle or Less", "Some High", "High School Graduate",
-                     "Some College", "College_Graduate")) {
-rmarkdown::render("./main.Rmd", output_file = paste0(tolower(gsub(" ", "_",
-                                                                  x = educ_level)
-                                                             ),
-                                                     ".html"
-                                                     ),
-                  params = list(Education = educ_level)
-                  )
-}
-```
-
-
 # Introduction
 
 The following analysis uses a subset of data from the 2015 Behavioral Risk Factor Surveillance System (BRFSS). The dataset consists of three files with survey responses pertaining to diabetes.
+
 # Data
 
 ```{r}
@@ -63,7 +44,7 @@ diab <- diab %>% mutate(
     Education == 5 ~ "Some College",
     Education == 6 ~ "College Graduate"
   ),
-  Diabetes_binary = factor(x = Diabetes_binary, levels = c(0,1), labels = c("No Diabetes", "Diabetes")),
+  Diabetes_binary = factor(x = Diabetes_binary, levels = c(0,1), labels = c("No_Diabetes", "Diabetes")),
   Sex = factor(x = Sex, levels = c(0,1), labels = c("Female", "Male")),
   DiffWalk = factor(x = DiffWalk, levels = c(0,1), labels = c("No", "Yes")),
   GenHlth = factor(x = GenHlth, levels = 1:5,
@@ -77,15 +58,15 @@ diab <- diab %>% mutate(
   Smoker = factor(Smoker, levels = c(0,1), labels = c("No", "Yes")),
   Stroke = factor(Stroke, levels = c(0,1), labels = c("No", "Yes")),
   HeartDiseaseorAttack = factor(HeartDiseaseorAttack, levels = c(0,1), labels = c("No", "Yes")),
-  PhysActivity = factor(PhysActivity,levels = c(0,1), labels = c("No", "Yes")),
+  PhysActivity = factor(PhysActivity, levels = c(0,1), labels = c("No", "Yes")),
   Fruits = factor(Fruits, levels = c(0,1), labels = c("No", "Yes")),
   Veggies = factor(Veggies, levels = c(0,1), labels = c("No", "Yes")),
   Age = factor(Age, levels = c(1:14),
                labels = c("18-24","25-29","30-34","35-39","40-44","45-49","50-54",
                           "55-59","60-64","65-69","70-74","75-79","80+",NA)),
   Income = factor(Income, levels = c(1:9)),
-  PhysHlth = factor(Income, levels = c(1:30)),
-  MentHlth = factor(MentHlth, levels = c(1:30))
+  PhysHlth = factor(PhysHlth, levels = c(0:30)),
+  MentHlth = factor(MentHlth, levels = c(0:30))
 )
 
 diab_subset <- diab %>% filter(Education == params$Education)
@@ -136,7 +117,15 @@ grid.arrange(grobs = cat_plots[13:16], nCol = 2)
 grid.arrange(grobs = cat_plots[17:20], nCol = 2)
 ```
 
-## Summarization 2
+## Two-Way Contingency Tables 
+
+Given the nature of the response ariable as binary, a two-way contingency table 
+naturally arises as a way to more numerically visualize the relationship between
+response and predictor. In the below tables, one may interpret each *cell* as the 
+number of observations in the dataset having response variable `Diabetes_binary`
+value either $0$ or $1$ and the answer to questions such as eating fruits (`Fruits`),
+high cholesterol (`HighChol`), or age (`Age`).
+
 ```{r}
 tab <- table(diab_subset$Diabetes_binary,
              diab_subset$Fruits)
@@ -146,22 +135,28 @@ tab
 tab1 <- table(diab_subset$Diabetes_binary,
               diab_subset$HighChol)
 tab1
+
+tab2 <- table(diab_subset$Diabetes_binary,
+              diab_subset$Age)
 ```
 
 
-## Summarization 3
+## Barplots of Response For Interesting Predictors
+
+[Describe what to look for]
+
 ```{r}
 g <- ggplot(data = diab_subset, aes(x = diab_subset$HighChol))
-g + geom_bar(aes(fill = diab_subset$Diabetes_binary))
+g + geom_bar(aes(fill = diab_subset$Diabetes_binary)) + theme_bw()
 
 g2 <-ggplot(data = diab_subset, aes(x= diab_subset$Fruits))
-g2 + geom_bar(aes(fill= diab_subset$Diabetes_binary))
+g2 + geom_bar(aes(fill= diab_subset$Diabetes_binary)) + theme_bw()
+
+g3 <- ggplot(data = diab_subset, aes(x = diab_subset$Age))
+g3 + geom_bar(aes(fill = diab_subset$Age)) + theme_bw()
 ```
 
-##Summarization 4
-```{r}
 
-```
 
 # Modeling
 
@@ -173,7 +168,7 @@ based on a 70-30 split.
 ```{r}
 # 70% <=> p = 0.7
 indices <- createDataPartition(1:nrow(diab_subset), p = 0.7,list = F) 
-train   <- diab_subset[indices,]
+train   <- diab_subset[indices,] 
 test    <- diab_subset[-indices,]
 ```
 
@@ -244,14 +239,89 @@ With this type of data, we consider logistic regression as a candidate modeling 
 #### Fitting of Candidate Logistic Regression Models
 
 ```{r}
+control <- trainControl(method="cv", number=5, classProbs=TRUE, summaryFunction=mnLogLoss)
+logreg1 <- train(Diabetes_binary ~ .,
+                 data= train %>% select(-Education),
+                 family = "binomial",
+                 method = "glmnet",
+                 metric = "logLoss",
+                 trControl = control)
+logreg2 <- train(Diabetes_binary ~ AnyHealthcare + 
+                 GenHlth + MentHlth + PhysHlth + AnyHealthcare*GenHlth + Smoker,
+                 data=train, 
+                 family = "binomial",
+                 method = "glmnet",
+                 metric = "logLoss",
+                 trControl = control)
+logreg3 <- train(Diabetes_binary ~ BMI + Age + HighChol +
+                 Fruits + Veggies + Sex + Age*Sex + HighChol*Sex + BMI*Sex,
+                 data=train, 
+                 family = "binomial",
+                 method = "glmnet",
+                 metric = "logLoss",
+                 trControl = control)
+```
 
+
+```{r}
+logreg1Pred <- as.numeric(predict(logreg1, test %>% 
+                           select(-Education),
+                       type = "prob")[,2] > 0.5)
+logreg2Pred <- as.numeric(predict(logreg2, test,
+                       type = "prob")[,2] > 0.5)
+logreg3Pred <- as.numeric(predict(logreg3, test,
+                       type = "prob")[,2] > 0.5)
+
+lr1CM <- confusionMatrix(as.factor(logreg1Pred), 
+          as.factor(as.numeric(as.factor(test$Diabetes_binary)) - 1),
+          positive = "1")
+lr2CM <- confusionMatrix(as.factor(logreg2Pred), 
+            as.factor(as.numeric(as.factor(test$Diabetes_binary)) - 1),
+          positive = "1")
+lr3CM <- confusionMatrix(as.factor(logreg3Pred), 
+          as.factor(as.numeric(as.factor(test$Diabetes_binary)) - 1),
+          positive = "1")
+```
+
+```{r}
+getAccSenSpec <- function(c) {
+  return(data.frame(c$overall["Accuracy"],
+         c$byClass["Sensitivity"],
+         c$byClass["Specificity"]))
+}
+
+logregResults <- sapply(list(lr1CM, lr2CM, lr3CM), 
+       function(x) {
+         getAccSenSpec(x)
+       })
+row.names(logregResults) <- c("Accuracy", "Sensitivity", "Specificity")
+colnames(logregResults) <- c("LR1", "LR2", "LR3")
+# lr1CM
+# lr2CM
+# lr3CM
+logregResults
+```
+
+Because the focus of this model is health-based, it is reasonable to conclude that
+prioritizing a **lack of false negatives** (i.e., increasing sensitivity) is 
+a viable criterion on which to select a best model. Therefore, the candidate model
+chosen is that which has the highest sensitivity above (note LR1, LR2, and LR3
+refer to the respective first, second, or third logistic regression model).
+
+```{r}
+candidateLRModel <- ifelse(
+  which.max(logregResults[2,]) == 1,
+  logreg1,
+  ifelse( which.max(logregResults[2,]) == 2,
+          logreg2, logreg3)
+)
 ```
 
 
 ### LASSO Regression Model
 The lasso performs variable selection. It yields *sparse* models that only involve a subset of the variables. The lasso is more resistant to outliers than linear regression. The purpose of the lasso model is to prevent overfitting.
-```{r}
 
+```{r}
 control <- trainControl(method="cv", number=5, classProbs=TRUE, summaryFunction=mnLogLoss)
 
 set.seed(100)
@@ -282,6 +352,12 @@ classTreeFit <-train(Diabetes_binary ~ .,
 
 
 ### Random Forest Model
+
+#### Description
+
+#### Advantage of Random Forest over Basic Classification Tree
+
+#### Fitting of Random Forest Model
 
 ### "New" Models
 
