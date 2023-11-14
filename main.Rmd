@@ -324,12 +324,9 @@ The lasso performs variable selection. It yields *sparse* models that only invol
 ```{r}
 control <- trainControl(method="cv", number=5, classProbs=TRUE, summaryFunction=mnLogLoss)
 
-set.seed(100)
-
 lassoFit <- train(Diabetes_binary ~ .,
-                     data = train,
+                     data= train %>% select(-Education),
                      method = "glmnet",
-                     preProcess = c("center", "scale"),
                      metric = "logLoss",
                      trControl =  control)
 ```
@@ -340,14 +337,12 @@ A classification tree is a tree-based method that splits the data into groups or
 ```{r}
 control <- trainControl(method="cv", number=5, classProbs=TRUE, summaryFunction=mnLogLoss)
 #set seed before training
-set.seed(50)
 
 classTreeFit <-train(Diabetes_binary ~ .,
-                     data = train,
+                     data= train %>% select(-Education),
                      method = "rpart",
-                     preProcess = c("center", "scale"),
+                     metric = "logLoss",
                      trControl =  control)
-
 ```
 
 
