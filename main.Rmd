@@ -425,11 +425,12 @@ rfFit$bestTune
 
 
 ### "New" Models
+
 #### New Model 1: Naive Bayes Classifier
 
 ##### Description
 
-[Do description of Naive Bayes]
+**Naive Bayes Classifier** (NBC) models are a classification model that utilize Bayesian statistical viewpoints to classify observations as belonging to one of many classes. The *naivete* of this classifier comes in the assumption of *independence* between all predictors, wherein the model assumes that the probability of observing a particular observation is then the convolution of probabilities of observing each particular predictor value. In practice, however, variables can be **dependent** on one another -- this is often a question tackled in regression via investigations into multicollinearity.
 
 ##### Fitting of Candidate Model
 
@@ -441,7 +442,12 @@ naiveBayes <- train(
   data = train %>% select(-Education),
   method = "naive_bayes",
   trControl = control,
-  metric = "logLoss"
+  metric = "logLoss",
+  tuneGrid = expand.grid(
+    laplace = c(0,1,10,100),
+    usekernel = c(TRUE, FALSE),
+    adjust = 1
+  )
 )
 ```
 
@@ -461,6 +467,13 @@ nbResults <- sapply(list(confMatNBC),
 row.names(nbResults) <- c("Accuracy", "Sensitivity", "Specificity", "Kappa")
 colnames(nbResults) <- c("Naive Bayes")
 nbResults
+```
+
+The candidate random forest model is *the* model fitted above, as we only considered
+one model. Note the hyperparameters (i.e., `mtry`, the number of parameters used) that resulted in the best fit are given below.
+
+```{r}
+naiveBayes$bestTune
 ```
 
 
