@@ -108,7 +108,7 @@ cat_plots <- lapply(unique(cat_summ$name),
                       )
                     })
 ```
-
+1
 ```{r}
 grid.arrange(grobs = cat_plots[1:4], nCol = 2)
 grid.arrange(grobs = cat_plots[5:8], nCol = 2)
