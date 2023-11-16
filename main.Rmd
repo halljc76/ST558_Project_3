@@ -426,7 +426,21 @@ naiveBayes$bestTune
 ```
 
 
-#### New Model 2: 
+#### New Model 2: Flexible Discriminant Analysis
+
+#### Description
+**Flexible Discriminant Analysis** models are a type of model that extends traditional Linear Discriminate Analysis by allowing flexibility to handle complex and class-specific covariate distributions. Flexible Discriminant Analysis relaxes the assumption that the predictor variables have a multivariate normal distribution within each class, so it is more suitable for situations where the normality assumption may not hold. 
+
+#### Fitting of Candidate Model
+```{r}
+control <- trainControl(method="cv", number=5, classProbs=TRUE, summaryFunction=mnLogLoss)
+
+fdaFit <- train(Diabetes_binary ~ .,
+                     data= train %>% select(-Education),
+                     method = "fda",
+                     metric = "logLoss",
+                     trControl =  control)
+```
 
 # Final Model Selection
 
