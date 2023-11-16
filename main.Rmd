@@ -1,6 +1,6 @@
 ---
 title: "ST 558 Project 3 Analysis"
-author: "Carter Hall"
+author: "Carter Hall, Autumn Locklear"
 date: "2023-11-05"
 output: 
   github_document:
@@ -435,13 +435,18 @@ naiveBayes$bestTune
 
 #### Fitting of Candidate Model
 ```{r}
-control <- trainControl(method="cv", number=5, classProbs=TRUE, summaryFunction=mnLogLoss)
+control <- trainControl(method="cv", number=5, classProbs=TRUE, 
+                        summaryFunction=mnLogLoss)
 
 fdaFit <- train(Diabetes_binary ~ .,
                      data= train %>% select(-Education),
                      method = "fda",
                      metric = "logLoss",
-                     trControl =  control)
+                     trControl =  control,
+                     tuneGrid = expand.grid(
+                        degree = c(1, 2, 3),       
+                        nprune = c(5, 10, 15)      
+                      ))
 ```
 
 # Final Model Selection
@@ -619,7 +624,7 @@ row.names(fdaResults) <- c("Accuracy", "Sensitivity", "Specificity", "Kappa",
 ## Combining Results
 
 ```{r}
-cbind(
+allResults <- cbind(
   logregResults,
   lassoResults,
   classTreeResults,
@@ -627,6 +632,20 @@ cbind(
   nbcResults,
   fdaResults
 )
+
+names <- c("Logistic Regression",
+           "LASSO",
+           "Classification Tree",
+           "Random Forest",
+           "Naive Bayes Classifier",
+           "FDA")
+
+allResults
 ```
 
 ## Final Model Declaration
+
+Based on the logLoss metric, we see that the `r names[which.min(allResults[5,])]`
+model is the **best performing** model, minimizing the log-loss metric compared 
+to the other models tested. 
+`
