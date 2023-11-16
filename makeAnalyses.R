@@ -7,8 +7,8 @@ for (educ_level in c("Middle or Less", "Some High", "High School Graduate",
   rmarkdown::render("./main.Rmd", output_file = paste0(tolower(gsub(" ", "_",
                                                                     x = educ_level)
   ),
-  ".html"
-  ),
+  ".md"
+  ), 
   params = list(Education = educ_level)
   )
 }

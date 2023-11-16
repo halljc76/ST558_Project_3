@@ -2,7 +2,9 @@
 title: "ST 558 Project 3 Analysis"
 author: "Carter Hall"
 date: "2023-11-05"
-output: github_document
+output: 
+  github_document:
+    html_preview: false
 ---
 
 ```{r include=FALSE}
@@ -239,7 +241,8 @@ With this type of data, we consider logistic regression as a candidate modeling 
 #### Fitting of Candidate Logistic Regression Models
 
 ```{r}
-control <- trainControl(method="cv", number=5, classProbs=TRUE, summaryFunction=twoClassSummary)
+control <- trainControl(method="cv", number=5, classProbs=TRUE, 
+                        summaryFunction=mnLogLoss)
 logreg1 <- train(Diabetes_binary ~ .,
                  data= train %>% select(-Education),
                  family = "binomial",
@@ -263,56 +266,23 @@ logreg3 <- train(Diabetes_binary ~ BMI + Age + HighChol +
                  trControl = control)
 ```
 
+In a comparison of the logsitic regression models based on the logLoss metric,
+we see the results below at the best hyperparameters for each individual model.
+The models are then compared based on logLoss to determine the candidate logistic
+regression model, stored in `candidateLRModel` below.
 
 ```{r}
-logreg1Pred <- as.numeric(predict(logreg1, test %>% 
-                           select(-Education),
-                       type = "prob")[,2] > 0.5)
-logreg2Pred <- as.numeric(predict(logreg2, test,
-                       type = "prob")[,2] > 0.5)
-logreg3Pred <- as.numeric(predict(logreg3, test,
-                       type = "prob")[,2] > 0.5)
+logregResults <- rbind(
+  logreg1$results[which.min(logreg1$results$logLoss),],
+  logreg2$results[which.min(logreg2$results$logLoss),],
+  logreg3$results[which.min(logreg3$results$logLoss),]
+)
 
-lr1CM <- confusionMatrix(as.factor(logreg1Pred), 
-          as.factor(as.numeric(as.factor(test$Diabetes_binary)) - 1),
-          positive = "1")
-lr2CM <- confusionMatrix(as.factor(logreg2Pred), 
-            as.factor(as.numeric(as.factor(test$Diabetes_binary)) - 1),
-          positive = "1")
-lr3CM <- confusionMatrix(as.factor(logreg3Pred), 
-          as.factor(as.numeric(as.factor(test$Diabetes_binary)) - 1),
-          positive = "1")
-```
-
-```{r}
-getAccSenSpec <- function(c) {
-  return(data.frame(c$overall["Accuracy"],
-         c$byClass["Sensitivity"],
-         c$byClass["Specificity"],
-         c$overall["Kappa"]))
-}
-
-logregResults <- sapply(list(lr1CM, lr2CM, lr3CM), 
-       function(x) {
-         getAccSenSpec(x)
-       })
-row.names(logregResults) <- c("Accuracy", "Sensitivity", "Specificity", 
-                              "Kappa")
-colnames(logregResults) <- c("LR1", "LR2", "LR3")
-# lr1CM
-# lr2CM
-# lr3CM
 logregResults
 ```
 
-Because the focus of this model is health-based, it is reasonable to conclude that
-prioritizing a **lack of false negatives** (i.e., increasing sensitivity) is 
-a viable criterion on which to select a best model. Therefore, the candidate model
-chosen is that which has the highest sensitivity above (note LR1, LR2, and LR3
-refer to the respective first, second, or third logistic regression model). Note that we might also consider which model has the highest Kappa, $\kappa$, which indicates the agreement of the test predictions to the test observations (the value should be closer to $+1$).
-
 ```{r}
-candidateLRModel <- c(logreg1, logreg2, logreg3)[which.max(logregResults[2,])]
+candidateLRModel <- list(logreg1, logreg2, logreg3)[[which.min(logregResults[,3])]]
 ```
 
 ### LASSO Regression Model
@@ -326,28 +296,9 @@ lassoFit <- train(Diabetes_binary ~ .,
                      method = "glmnet",
                      metric = "logLoss",
                      trControl =  control)
-
-lassoPred <- as.numeric(predict(lassoFit, test,
-                       type = "prob")[,2] > 0.5)
-confMatLASSO <- confusionMatrix(as.factor(lassoPred), 
-          as.factor(as.numeric(as.factor(test$Diabetes_binary)) - 1),
-          positive = "1")
-confMatLASSO
 ```
 
-Consider the accuracy, sensitivity, and specificity (among other related values) computed below.
-
-```{r}
-lassoResults <- sapply(list(confMatLASSO), 
-       function(x) {
-         getAccSenSpec(x)
-       })
-row.names(lassoResults) <- c("Accuracy", "Sensitivity", "Specificity", "Kappa")
-colnames(lassoResults) <- c("LASSO")
-lassoResults
-```
-
-The candidate random forest model is *the* model fitted above, as we only considered
+The candidate LASSO model is *the* model fitted above, as we only considered
 one model. Note the hyperparameters (i.e., `mtry`, the number of parameters used) that resulted in the best fit are given below.
 
 ```{r}
@@ -367,28 +318,9 @@ classTreeFit <-train(Diabetes_binary ~ .,
                      method = "rpart",
                      metric = "logLoss",
                      trControl =  control)
-
-classTreePred <- as.numeric(predict(classTreeFit, test,
-                       type = "prob")[,2] > 0.5)
-confMatCT <- confusionMatrix(as.factor(classTreePred), 
-          as.factor(as.numeric(as.factor(test$Diabetes_binary)) - 1),
-          positive = "1")
-confMatCT
 ```
 
-Consider the accuracy, sensitivity, and specificity (among other related values) computed below.
-
-```{r}
-ctResults <- sapply(list(confMatCT), 
-       function(x) {
-         getAccSenSpec(x)
-       })
-row.names(ctResults) <- c("Accuracy", "Sensitivity", "Specificity", "Kappa")
-colnames(ctResults) <- c("Classification Tree")
-ctResults
-```
-
-The candidate random forest model is *the* model fitted above, as we only considered
+The candidate classification model model is *the* model fitted above, as we only considered
 one model. Note the hyperparameters (i.e., `mtry`, the number of parameters used) that resulted in the best fit are given below.
 
 ```{r}
@@ -442,34 +374,13 @@ The reason for utilizing random forests with is because if a really strong predi
 
 ```{r}
 control <- trainControl(method="cv", number=5,
-                        classProbs=TRUE, summaryFunction=twoClassSummary)
+                        classProbs=TRUE, summaryFunction=mnLogLoss)
 rfFit <- train(Diabetes_binary ~ ., 
                data = train %>% select(-Education),
                method = "rf",
                metric = "logLoss",
                trControl = control,
                tuneGrid = expand.grid(mtry = c(1,3,5,7,10,15)))
-```
-
-```{r}
-rfPred <- as.numeric(predict(rfFit, test,
-                       type = "prob")[,2] > 0.5)
-confMatRF <- confusionMatrix(as.factor(rfPred), 
-          as.factor(as.numeric(as.factor(test$Diabetes_binary)) - 1),
-          positive = "1")
-confMatRF
-```
-
-Consider the accuracy, sensitivity, and specificity (among other related values) computed below.
-
-```{r}
-rfResults <- sapply(list(confMatRF), 
-       function(x) {
-         getAccSenSpec(x)
-       })
-row.names(rfResults) <- c("Accuracy", "Sensitivity", "Specificity", "Kappa")
-colnames(rfResults) <- c("Random Forest")
-rfResults
 ```
 
 The candidate random forest model is *the* model fitted above, as we only considered
@@ -507,6 +418,141 @@ naiveBayes <- train(
 )
 ```
 
+The candidate random forest model is *the* model fitted above, as we only considered
+one model. Note the hyperparameters (i.e., `mtry`, the number of parameters used) that resulted in the best fit are given below.
+
+```{r}
+naiveBayes$bestTune
+```
+
+
+#### New Model 2: 
+
+# Final Model Selection
+
+## Predicting the Model on Test Set
+
+Below is a function that helps combine results from confusion matrices.
+
+```{r}
+getAccSenSpec <- function(c) {
+  return(c(c$overall["Accuracy"],
+         c$byClass["Sensitivity"],
+         c$byClass["Specificity"],
+         c$overall["Kappa"]))
+}
+```
+
+
+### Logistic Regression
+
+```{r}
+logregPred <- as.numeric(predict(candidateLRModel, test,
+                       type = "prob")[,2] > 0.5)
+confMatLR <- confusionMatrix(as.factor(logregPred), 
+          as.factor(as.numeric(as.factor(test$Diabetes_binary)) - 1),
+          positive = "1")
+confMatLR
+```
+
+Consider the accuracy, sensitivity, and specificity (among other related values) computed below.
+These values will be reported in a final comparison.
+
+```{r}
+logregResults <- sapply(list(confMatLR), 
+       function(x) {
+         getAccSenSpec(x)
+       })
+colnames(logregResults) <- c("Logistic Regression")
+temp <- data.frame(candidateLRModel$results[which.min(candidateLRModel$results$logLoss),"logLoss"])
+colnames(temp) <- c("Logistic Regression")
+logregResults <- rbind(logregResults, 
+                      temp)
+row.names(logregResults) <- c("Accuracy", "Sensitivity", "Specificity", "Kappa",
+                             "Log Loss")
+```
+
+### LASSO
+```{r}
+lassoPred <- as.numeric(predict(lassoFit, test,
+                       type = "prob")[,2] > 0.5)
+confMatLASSO <- confusionMatrix(as.factor(lassoPred), 
+          as.factor(as.numeric(as.factor(test$Diabetes_binary)) - 1),
+          positive = "1")
+confMatLASSO
+```
+
+Consider the accuracy, sensitivity, and specificity (among other related values) computed below.
+These values will be reported in a final comparison.
+
+```{r}
+lassoResults <- sapply(list(confMatLASSO), 
+       function(x) {
+         getAccSenSpec(x)
+       })
+colnames(lassoResults) <- c("LASSO")
+temp <- data.frame(lassoFit$results[which.min(lassoFit$results$logLoss),"logLoss"])
+colnames(temp) <- c("LASSO")
+lassoResults <- rbind(lassoResults, 
+                      temp)
+row.names(lassoResults) <- c("Accuracy", "Sensitivity", "Specificity", "Kappa",
+                             "Log Loss")
+```
+
+### Classification Tree
+```{r}
+classTreePred <- as.numeric(predict(classTreeFit, test,
+                       type = "prob")[,2] > 0.5)
+confMatCT <- confusionMatrix(as.factor(classTreePred), 
+          as.factor(as.numeric(as.factor(test$Diabetes_binary)) - 1),
+          positive = "1")
+confMatCT
+```
+
+Consider the accuracy, sensitivity, and specificity (among other related values) computed below.
+
+```{r}
+classTreeResults <- sapply(list(confMatCT), 
+       function(x) {
+         getAccSenSpec(x)
+       })
+colnames(classTreeResults) <- c("Classification Tree")
+temp <- data.frame(classTreeFit$results[which.min(classTreeFit$results$logLoss),"logLoss"])
+colnames(temp) <- c("Classification Tree")
+classTreeResults <- rbind(classTreeResults, 
+                      temp)
+row.names(classTreeResults) <- c("Accuracy", "Sensitivity", "Specificity", "Kappa",
+                             "Log Loss")
+```
+
+### Random Forest
+```{r}
+rfPred <- as.numeric(predict(rfFit, test,
+                       type = "prob")[,2] > 0.5)
+confMatRF <- confusionMatrix(as.factor(rfPred), 
+          as.factor(as.numeric(as.factor(test$Diabetes_binary)) - 1),
+          positive = "1")
+confMatRF
+```
+
+Consider the accuracy, sensitivity, and specificity (among other related values) computed below.
+
+```{r}
+rfResults <- sapply(list(confMatRF), 
+       function(x) {
+         getAccSenSpec(x)
+       })
+colnames(rfResults) <- c("Random Forest")
+temp <- data.frame(rfFit$results[which.min(rfFit$results$logLoss),"logLoss"])
+colnames(temp) <- c("Random Forest")
+rfResults <- rbind(rfResults, 
+                      temp)
+row.names(rfResults) <- c("Accuracy", "Sensitivity", "Specificity", "Kappa",
+                             "Log Loss")
+```
+
+### Naive Bayes
+
 ```{r}
 naiveBayesPred <- as.numeric(predict(naiveBayes, test,
                        type = "prob")[,2] > 0.5)
@@ -517,23 +563,29 @@ confMatNBC
 ```
 
 ```{r}
-nbResults <- sapply(list(confMatNBC), 
+nbcResults <- sapply(list(confMatNBC), 
        function(x) {
          getAccSenSpec(x)
        })
-row.names(nbResults) <- c("Accuracy", "Sensitivity", "Specificity", "Kappa")
-colnames(nbResults) <- c("Naive Bayes")
-nbResults
+colnames(nbcResults) <- c("Naive Bayes")
+temp <- data.frame(naiveBayes$results[which.min(naiveBayes$results$logLoss),"logLoss"])
+colnames(temp) <- c("Naive Bayes")
+nbcResults <- rbind(nbcResults, 
+                      temp)
+row.names(nbcResults) <- c("Accuracy", "Sensitivity", "Specificity", "Kappa",
+                             "Log Loss")
 ```
 
-The candidate random forest model is *the* model fitted above, as we only considered
-one model. Note the hyperparameters (i.e., `mtry`, the number of parameters used) that resulted in the best fit are given below.
+## Combining Results
 
 ```{r}
-naiveBayes$bestTune
+cbind(
+  logregResults,
+  lassoResults,
+  classTreeResults,
+  rfResults,
+  nbcResults
+)
 ```
 
-
-#### New Model 2:
-
-# Final Model Selection
+## Final Model Declaration
