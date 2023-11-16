@@ -21,7 +21,9 @@ set.seed(558)
 
 # Introduction
 
-The following analysis uses a subset of data from the 2015 Behavioral Risk Factor Surveillance System (BRFSS). The dataset consists of three files with survey responses pertaining to diabetes.
+The following analysis uses a subset of data from the 2015 Behavioral Risk Factor Surveillance System (BRFSS). The specific data set includes a binary variable for diabetes, and other categorical variables to represent health risk factors such as heart disease, high cholesterol, and smoking status.
+
+The purpose of this Exploratory Data Analysis is to better understand the dataset variables and the relationship between them. The purpose of modeling is to predict whether or not a patient is at risk for diabetes based on other health indicators.  
 
 # Data
 
@@ -145,7 +147,7 @@ tab2 <- table(diab_subset$Diabetes_binary,
 
 ## Barplots of Response For Interesting Predictors
 
-[Describe what to look for]
+Barplots provide a visual of the distribution for our variables. For example, below we see that more survey participants responded "Yes" to high cholesterol (`HighChol`), we also see there is a higher prevalence of diabetes in the high cholesterol group, indicating that high cholesterol might also be a risk factor for diabetes. The other plots display the proportion of survey participants that report eating `Fruits`, and the age distribution in the sample.
 
 ```{r}
 g <- ggplot(data = diab_subset, aes(x = diab_subset$HighChol))
@@ -429,7 +431,7 @@ naiveBayes$bestTune
 #### New Model 2: Flexible Discriminant Analysis
 
 #### Description
-**Flexible Discriminant Analysis** models are a type of model that extends traditional Linear Discriminate Analysis by allowing flexibility to handle complex and class-specific covariate distributions. Flexible Discriminant Analysis relaxes the assumption that the predictor variables have a multivariate normal distribution within each class, so it is more suitable for situations where the normality assumption may not hold. 
+**Flexible Discriminant Analysis** models are a type of model that extends traditional Linear Discriminate Analysis by allowing flexibility to handle complex and class-specific covariate distributions. Flexible Discriminant Analysis relaxes the assumption that the predictor variables have a multivariate normal distribution within each class, so it is more suitable for situations where the normality assumption may not hold.
 
 #### Fitting of Candidate Model
 ```{r}
@@ -590,6 +592,30 @@ row.names(nbcResults) <- c("Accuracy", "Sensitivity", "Specificity", "Kappa",
                              "Log Loss")
 ```
 
+### Flexible Discriminant Analysis
+```{r}
+classFDAPred <- as.numeric(predict(classTreeFit, test,
+                       type = "prob")[,2] > 0.5)
+confMatFDA <- confusionMatrix(as.factor(classFDAPred), 
+          as.factor(as.numeric(as.factor(test$Diabetes_binary)) - 1),
+          positive = "1")
+confMatFDA
+```
+
+```{r}
+fdaResults <- sapply(list(confMatFDA), 
+       function(x) {
+         getAccSenSpec(x)
+       })
+colnames(fdaResults) <- c("Flexible Discriminant")
+temp <- data.frame(naiveBayes$results[which.min(naiveBayes$results$logLoss),"logLoss"])
+colnames(temp) <- c("Flexible Discriminant")
+fdaResults <- rbind(fdaResults, 
+                      temp)
+row.names(fdaResults) <- c("Accuracy", "Sensitivity", "Specificity", "Kappa",
+                             "Log Loss")
+```
+
 ## Combining Results
 
 ```{r}
@@ -598,7 +624,8 @@ cbind(
   lassoResults,
   classTreeResults,
   rfResults,
-  nbcResults
+  nbcResults,
+  fdaResults
 )
 ```
 
