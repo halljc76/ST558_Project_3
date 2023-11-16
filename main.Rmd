@@ -613,7 +613,7 @@ fdaResults <- sapply(list(confMatFDA),
          getAccSenSpec(x)
        })
 colnames(fdaResults) <- c("Flexible Discriminant")
-temp <- data.frame(naiveBayes$results[which.min(naiveBayes$results$logLoss),"logLoss"])
+temp <- data.frame(fdaFit$results[which.min(fdaFit$results$logLoss),"logLoss"])
 colnames(temp) <- c("Flexible Discriminant")
 fdaResults <- rbind(fdaResults, 
                       temp)
