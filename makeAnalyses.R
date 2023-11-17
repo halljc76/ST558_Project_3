@@ -1,7 +1,7 @@
-for (educ_level in c("High School Graduate",
+for (educ_level in c("Middle or Less", "Some High", "High School Graduate",
                      "Some College", "College Graduate")) {
   rmarkdown::render("main.Rmd", output_format = "github_document",
                     output_file = paste0(gsub(" ","_","High School Graduate"),".md"),
-                    params = list(Education = "High School Graduate")
+                    params = list(Education = educ_level)
   )
 }
