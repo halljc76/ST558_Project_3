@@ -153,31 +153,31 @@ cat_plots <- lapply(unique(cat_summ$name),
 grid.arrange(grobs = cat_plots[1:4], nCol = 2)
 ```
 
-![](Middle_or_Less_files/figure-gfm/unnamed-chunk-4-1.png)<!-- -->
+![](middle_or_less_files/figure-gfm/unnamed-chunk-4-1.png)<!-- -->
 
 ``` r
 grid.arrange(grobs = cat_plots[5:8], nCol = 2)
 ```
 
-![](Middle_or_Less_files/figure-gfm/unnamed-chunk-4-2.png)<!-- -->
+![](middle_or_less_files/figure-gfm/unnamed-chunk-4-2.png)<!-- -->
 
 ``` r
 grid.arrange(grobs = cat_plots[9:12], nCol = 2)
 ```
 
-![](Middle_or_Less_files/figure-gfm/unnamed-chunk-4-3.png)<!-- -->
+![](middle_or_less_files/figure-gfm/unnamed-chunk-4-3.png)<!-- -->
 
 ``` r
 grid.arrange(grobs = cat_plots[13:16], nCol = 2)
 ```
 
-![](Middle_or_Less_files/figure-gfm/unnamed-chunk-4-4.png)<!-- -->
+![](middle_or_less_files/figure-gfm/unnamed-chunk-4-4.png)<!-- -->
 
 ``` r
 grid.arrange(grobs = cat_plots[17:20], nCol = 2)
 ```
 
-![](Middle_or_Less_files/figure-gfm/unnamed-chunk-4-5.png)<!-- -->
+![](middle_or_less_files/figure-gfm/unnamed-chunk-4-5.png)<!-- -->
 
 ## Two-Way Contingency Tables
 
@@ -237,7 +237,7 @@ g + geom_bar(aes(fill = diab_subset$Diabetes_binary)) + theme_bw()
     ## Warning: Use of `diab_subset$HighChol` is discouraged.
     ## ℹ Use `HighChol` instead.
 
-![](Middle_or_Less_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
+![](middle_or_less_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
 
 ``` r
 g2 <-ggplot(data = diab_subset, aes(x= diab_subset$Fruits))
@@ -250,7 +250,7 @@ g2 + geom_bar(aes(fill= diab_subset$Diabetes_binary)) + theme_bw()
     ## Warning: Use of `diab_subset$Fruits` is discouraged.
     ## ℹ Use `Fruits` instead.
 
-![](Middle_or_Less_files/figure-gfm/unnamed-chunk-6-2.png)<!-- -->
+![](middle_or_less_files/figure-gfm/unnamed-chunk-6-2.png)<!-- -->
 
 ``` r
 g3 <- ggplot(data = diab_subset, aes(x = diab_subset$Age))
@@ -263,7 +263,7 @@ g3 + geom_bar(aes(fill = diab_subset$Age)) + theme_bw()
     ## Warning: Use of `diab_subset$Age` is discouraged.
     ## ℹ Use `Age` instead.
 
-![](Middle_or_Less_files/figure-gfm/unnamed-chunk-6-3.png)<!-- -->
+![](middle_or_less_files/figure-gfm/unnamed-chunk-6-3.png)<!-- -->
 
 # Modeling
 
