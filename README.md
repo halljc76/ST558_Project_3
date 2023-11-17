@@ -8,18 +8,19 @@ The purpose of this repository is to serve as a central hub for our analysis on 
 
 ### `R` Packages Used For Analysis
 
-- `library(readr)` 
-- `library(dplyr)`  
-- `library(tidyr)`  
-- `library(ggplot2)`  
-- `library(caret)`  
-- `library(cowplot)`  
-- `library(gridExtra)`  
-- `library(caret)`  
+- [`library(readr)`](https://readr.tidyverse.org/) 
+- [`library(dplyr)`](https://dplyr.tidyverse.org/)  
+- [`library(tidyr)`](https://www.tidyverse.org/)  
+- [`library(ggplot2)`](https://ggplot2.tidyverse.org/)  
+- [`library(caret)`](https://topepo.github.io/caret/index.html)  
+- [`library(cowplot)`](https://cran.r-project.org/web/packages/cowplot/index.html)  
+- [`library(gridExtra)`](https://cran.r-project.org/web/packages/gridExtra/index.html)  
+  
 
 
 ### Code for Reproducibility
 
+```r
 for (educ_level in c("Middle or Less", "Some High", "High School Graduate",
                      "Some College", "College_Graduate")) {
   rmarkdown::render("./main.Rmd", output_file = paste0(tolower(gsub(" ", "_",
@@ -30,6 +31,7 @@ for (educ_level in c("Middle or Less", "Some High", "High School Graduate",
   params = list(Education = educ_level)
   )
 }
+```
 
 ### HTML Links of Generated Analyses
 
