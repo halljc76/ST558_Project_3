@@ -3,6 +3,10 @@ ST 558 Project 3 Analysis
 Carter Hall, Autumn Locklear
 2023-11-05
 
+``` r
+knitr::opts_chunk$set(eval=FALSE)
+```
+
 # Introduction
 
 The following analysis uses a subset of data from the 2015 Behavioral
@@ -75,7 +79,26 @@ diab <- diab %>% mutate(
 )
 
 diab_subset <- diab %>% filter(Education == params$Education)
+diab_subset
 ```
+
+    ## # A tibble: 69,910 × 22
+    ##    Diabetes_binary HighBP HighChol CholCheck   BMI Smoker Stroke HeartDiseaseorAttack PhysActivity
+    ##    <fct>           <fct>  <fct>    <fct>     <dbl> <fct>  <fct>  <fct>                <fct>       
+    ##  1 No_Diabetes     Yes    Yes      Yes          24 No     No     No                   Yes         
+    ##  2 Diabetes        Yes    Yes      Yes          30 Yes    No     Yes                  No          
+    ##  3 No_Diabetes     Yes    Yes      Yes          34 Yes    No     No                   No          
+    ##  4 No_Diabetes     No     No       Yes          26 Yes    No     No                   No          
+    ##  5 Diabetes        No     No       Yes          23 Yes    No     No                   Yes         
+    ##  6 No_Diabetes     No     No       Yes          28 Yes    No     No                   No          
+    ##  7 Diabetes        Yes    No       Yes          27 No     No     No                   Yes         
+    ##  8 Diabetes        Yes    Yes      Yes          34 Yes    Yes    No                   Yes         
+    ##  9 No_Diabetes     No     No       Yes          22 No     No     No                   Yes         
+    ## 10 No_Diabetes     No     No       Yes          26 Yes    No     No                   Yes         
+    ## # ℹ 69,900 more rows
+    ## # ℹ 13 more variables: Fruits <fct>, Veggies <fct>, HvyAlcoholConsump <fct>, AnyHealthcare <fct>,
+    ## #   NoDocbcCost <fct>, GenHlth <fct>, MentHlth <fct>, PhysHlth <fct>, DiffWalk <fct>, Sex <fct>,
+    ## #   Age <fct>, Education <chr>, Income <fct>
 
 # Summarizations
 
@@ -131,33 +154,11 @@ cat_plots <- lapply(unique(cat_summ$name),
 
 ``` r
 grid.arrange(grobs = cat_plots[1:4], nCol = 2)
-```
-
-![](some_college_files/figure-gfm/unnamed-chunk-4-1.png)<!-- -->
-
-``` r
 grid.arrange(grobs = cat_plots[5:8], nCol = 2)
-```
-
-![](some_college_files/figure-gfm/unnamed-chunk-4-2.png)<!-- -->
-
-``` r
 grid.arrange(grobs = cat_plots[9:12], nCol = 2)
-```
-
-![](some_college_files/figure-gfm/unnamed-chunk-4-3.png)<!-- -->
-
-``` r
 grid.arrange(grobs = cat_plots[13:16], nCol = 2)
-```
-
-![](some_college_files/figure-gfm/unnamed-chunk-4-4.png)<!-- -->
-
-``` r
 grid.arrange(grobs = cat_plots[17:20], nCol = 2)
 ```
-
-![](some_college_files/figure-gfm/unnamed-chunk-4-5.png)<!-- -->
 
 ## Two-Way Contingency Tables
 
@@ -173,25 +174,12 @@ high cholesterol (`HighChol`), or age (`Age`).
 tab <- table(diab_subset$Diabetes_binary,
              diab_subset$Fruits)
 tab
-```
 
-    ##              
-    ##                 No  Yes
-    ##   No_Diabetes 1247 1740
-    ##   Diabetes     538  692
 
-``` r
 tab1 <- table(diab_subset$Diabetes_binary,
               diab_subset$HighChol)
 tab1
-```
 
-    ##              
-    ##                 No  Yes
-    ##   No_Diabetes 1611 1376
-    ##   Diabetes     354  876
-
-``` r
 tab2 <- table(diab_subset$Diabetes_binary,
               diab_subset$Age)
 ```
@@ -209,41 +197,13 @@ display the proportion of survey participants that report eating
 ``` r
 g <- ggplot(data = diab_subset, aes(x = diab_subset$HighChol))
 g + geom_bar(aes(fill = diab_subset$Diabetes_binary)) + theme_bw()
-```
 
-    ## Warning: Use of `diab_subset$Diabetes_binary` is discouraged.
-    ## ℹ Use `Diabetes_binary` instead.
-
-    ## Warning: Use of `diab_subset$HighChol` is discouraged.
-    ## ℹ Use `HighChol` instead.
-
-![](some_college_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
-
-``` r
 g2 <-ggplot(data = diab_subset, aes(x= diab_subset$Fruits))
 g2 + geom_bar(aes(fill= diab_subset$Diabetes_binary)) + theme_bw()
-```
 
-    ## Warning: Use of `diab_subset$Diabetes_binary` is discouraged.
-    ## ℹ Use `Diabetes_binary` instead.
-
-    ## Warning: Use of `diab_subset$Fruits` is discouraged.
-    ## ℹ Use `Fruits` instead.
-
-![](some_college_files/figure-gfm/unnamed-chunk-6-2.png)<!-- -->
-
-``` r
 g3 <- ggplot(data = diab_subset, aes(x = diab_subset$Age))
 g3 + geom_bar(aes(fill = diab_subset$Age)) + theme_bw()
 ```
-
-    ## Warning: Use of `diab_subset$Age` is discouraged.
-    ## ℹ Use `Age` instead.
-
-    ## Warning: Use of `diab_subset$Age` is discouraged.
-    ## ℹ Use `Age` instead.
-
-![](some_college_files/figure-gfm/unnamed-chunk-6-3.png)<!-- -->
 
 # Modeling
 
@@ -440,11 +400,6 @@ logregResults <- rbind(
 logregResults
 ```
 
-    ##   alpha     lambda   logLoss  logLossSD
-    ## 6  0.55 0.02290443 0.5261294 0.01248147
-    ## 9  1.00 0.01690926 0.5685430 0.01036535
-    ## 3  0.10 0.02002108 0.5515378 0.01134340
-
 ``` r
 candidateLRModel <- list(logreg1, logreg2, logreg3)[[which.min(logregResults[,3])]]
 ```
@@ -474,9 +429,6 @@ of parameters used) that resulted in the best fit are given below.
 lassoFit$bestTune
 ```
 
-    ##   alpha     lambda
-    ## 6  0.55 0.02290443
-
 ### Classification Tree Model
 
 A classification tree is a tree-based method that splits the data into
@@ -501,9 +453,6 @@ below.
 ``` r
 lassoFit$bestTune
 ```
-
-    ##   alpha     lambda
-    ## 6  0.55 0.02290443
 
 ### Random Forest Model
 
@@ -595,9 +544,6 @@ below.
 rfFit$bestTune
 ```
 
-    ##   mtry
-    ## 5   10
-
 ### “New” Models
 
 #### New Model 1: Naive Bayes Classifier
@@ -641,9 +587,6 @@ below.
 ``` r
 naiveBayes$bestTune
 ```
-
-    ##   laplace usekernel adjust
-    ## 1       0     FALSE      1
 
 #### New Model 2: Flexible Discriminant Analysis
 
@@ -700,34 +643,6 @@ confMatLR <- confusionMatrix(as.factor(logregPred),
 confMatLR
 ```
 
-    ## Confusion Matrix and Statistics
-    ## 
-    ##           Reference
-    ## Prediction   0   1
-    ##          0 861 296
-    ##          1  37  70
-    ##                                           
-    ##                Accuracy : 0.7366          
-    ##                  95% CI : (0.7113, 0.7607)
-    ##     No Information Rate : 0.7104          
-    ##     P-Value [Acc > NIR] : 0.0212          
-    ##                                           
-    ##                   Kappa : 0.1898          
-    ##                                           
-    ##  Mcnemar's Test P-Value : <2e-16          
-    ##                                           
-    ##             Sensitivity : 0.19126         
-    ##             Specificity : 0.95880         
-    ##          Pos Pred Value : 0.65421         
-    ##          Neg Pred Value : 0.74417         
-    ##              Prevalence : 0.28956         
-    ##          Detection Rate : 0.05538         
-    ##    Detection Prevalence : 0.08465         
-    ##       Balanced Accuracy : 0.57503         
-    ##                                           
-    ##        'Positive' Class : 1               
-    ## 
-
 Consider the accuracy, sensitivity, and specificity (among other related
 values) computed below. These values will be reported in a final
 comparison.
@@ -756,34 +671,6 @@ confMatLASSO <- confusionMatrix(as.factor(lassoPred),
           positive = "1")
 confMatLASSO
 ```
-
-    ## Confusion Matrix and Statistics
-    ## 
-    ##           Reference
-    ## Prediction   0   1
-    ##          0 861 296
-    ##          1  37  70
-    ##                                           
-    ##                Accuracy : 0.7366          
-    ##                  95% CI : (0.7113, 0.7607)
-    ##     No Information Rate : 0.7104          
-    ##     P-Value [Acc > NIR] : 0.0212          
-    ##                                           
-    ##                   Kappa : 0.1898          
-    ##                                           
-    ##  Mcnemar's Test P-Value : <2e-16          
-    ##                                           
-    ##             Sensitivity : 0.19126         
-    ##             Specificity : 0.95880         
-    ##          Pos Pred Value : 0.65421         
-    ##          Neg Pred Value : 0.74417         
-    ##              Prevalence : 0.28956         
-    ##          Detection Rate : 0.05538         
-    ##    Detection Prevalence : 0.08465         
-    ##       Balanced Accuracy : 0.57503         
-    ##                                           
-    ##        'Positive' Class : 1               
-    ## 
 
 Consider the accuracy, sensitivity, and specificity (among other related
 values) computed below. These values will be reported in a final
@@ -814,34 +701,6 @@ confMatCT <- confusionMatrix(as.factor(classTreePred),
 confMatCT
 ```
 
-    ## Confusion Matrix and Statistics
-    ## 
-    ##           Reference
-    ## Prediction   0   1
-    ##          0 848 290
-    ##          1  50  76
-    ##                                           
-    ##                Accuracy : 0.731           
-    ##                  95% CI : (0.7057, 0.7553)
-    ##     No Information Rate : 0.7104          
-    ##     P-Value [Acc > NIR] : 0.05612         
-    ##                                           
-    ##                   Kappa : 0.1886          
-    ##                                           
-    ##  Mcnemar's Test P-Value : < 2e-16         
-    ##                                           
-    ##             Sensitivity : 0.20765         
-    ##             Specificity : 0.94432         
-    ##          Pos Pred Value : 0.60317         
-    ##          Neg Pred Value : 0.74517         
-    ##              Prevalence : 0.28956         
-    ##          Detection Rate : 0.06013         
-    ##    Detection Prevalence : 0.09968         
-    ##       Balanced Accuracy : 0.57599         
-    ##                                           
-    ##        'Positive' Class : 1               
-    ## 
-
 Consider the accuracy, sensitivity, and specificity (among other related
 values) computed below.
 
@@ -869,34 +728,6 @@ confMatRF <- confusionMatrix(as.factor(rfPred),
           positive = "1")
 confMatRF
 ```
-
-    ## Confusion Matrix and Statistics
-    ## 
-    ##           Reference
-    ## Prediction   0   1
-    ##          0 849 287
-    ##          1  49  79
-    ##                                           
-    ##                Accuracy : 0.7342          
-    ##                  95% CI : (0.7089, 0.7584)
-    ##     No Information Rate : 0.7104          
-    ##     P-Value [Acc > NIR] : 0.03287         
-    ##                                           
-    ##                   Kappa : 0.1998          
-    ##                                           
-    ##  Mcnemar's Test P-Value : < 2e-16         
-    ##                                           
-    ##             Sensitivity : 0.2158          
-    ##             Specificity : 0.9454          
-    ##          Pos Pred Value : 0.6172          
-    ##          Neg Pred Value : 0.7474          
-    ##              Prevalence : 0.2896          
-    ##          Detection Rate : 0.0625          
-    ##    Detection Prevalence : 0.1013          
-    ##       Balanced Accuracy : 0.5806          
-    ##                                           
-    ##        'Positive' Class : 1               
-    ## 
 
 Consider the accuracy, sensitivity, and specificity (among other related
 values) computed below.
@@ -926,34 +757,6 @@ confMatNBC <- confusionMatrix(as.factor(naiveBayesPred),
 confMatNBC
 ```
 
-    ## Confusion Matrix and Statistics
-    ## 
-    ##           Reference
-    ## Prediction   0   1
-    ##          0 411  73
-    ##          1 487 293
-    ##                                           
-    ##                Accuracy : 0.557           
-    ##                  95% CI : (0.5291, 0.5846)
-    ##     No Information Rate : 0.7104          
-    ##     P-Value [Acc > NIR] : 1               
-    ##                                           
-    ##                   Kappa : 0.1934          
-    ##                                           
-    ##  Mcnemar's Test P-Value : <2e-16          
-    ##                                           
-    ##             Sensitivity : 0.8005          
-    ##             Specificity : 0.4577          
-    ##          Pos Pred Value : 0.3756          
-    ##          Neg Pred Value : 0.8492          
-    ##              Prevalence : 0.2896          
-    ##          Detection Rate : 0.2318          
-    ##    Detection Prevalence : 0.6171          
-    ##       Balanced Accuracy : 0.6291          
-    ##                                           
-    ##        'Positive' Class : 1               
-    ## 
-
 ``` r
 nbcResults <- sapply(list(confMatNBC), 
        function(x) {
@@ -978,34 +781,6 @@ confMatFDA <- confusionMatrix(as.factor(classFDAPred),
           positive = "1")
 confMatFDA
 ```
-
-    ## Confusion Matrix and Statistics
-    ## 
-    ##           Reference
-    ## Prediction   0   1
-    ##          0 848 290
-    ##          1  50  76
-    ##                                           
-    ##                Accuracy : 0.731           
-    ##                  95% CI : (0.7057, 0.7553)
-    ##     No Information Rate : 0.7104          
-    ##     P-Value [Acc > NIR] : 0.05612         
-    ##                                           
-    ##                   Kappa : 0.1886          
-    ##                                           
-    ##  Mcnemar's Test P-Value : < 2e-16         
-    ##                                           
-    ##             Sensitivity : 0.20765         
-    ##             Specificity : 0.94432         
-    ##          Pos Pred Value : 0.60317         
-    ##          Neg Pred Value : 0.74517         
-    ##              Prevalence : 0.28956         
-    ##          Detection Rate : 0.06013         
-    ##    Detection Prevalence : 0.09968         
-    ##       Balanced Accuracy : 0.57599         
-    ##                                           
-    ##        'Positive' Class : 1               
-    ## 
 
 ``` r
 fdaResults <- sapply(list(confMatFDA), 
@@ -1043,21 +818,8 @@ names <- c("Logistic Regression",
 allResults
 ```
 
-    ##             Logistic Regression     LASSO Classification Tree Random Forest Naive Bayes
-    ## Accuracy              0.7365506 0.7365506           0.7310127     0.7341772   0.5569620
-    ## Sensitivity           0.1912568 0.1912568           0.2076503     0.2158470   0.8005464
-    ## Specificity           0.9587973 0.9587973           0.9443207     0.9454343   0.4576837
-    ## Kappa                 0.1898496 0.1898496           0.1886054     0.1997588   0.1934219
-    ## Log Loss              0.5261294 0.5256117           0.5896087     0.5287903   4.9761069
-    ##             Flexible Discriminant
-    ## Accuracy                0.7310127
-    ## Sensitivity             0.2076503
-    ## Specificity             0.9443207
-    ## Kappa                   0.1886054
-    ## Log Loss                0.5235338
-
 ## Final Model Declaration
 
-Based on the logLoss metric, we see that the FDA model is the **best
-performing** model, minimizing the log-loss metric compared to the other
-models tested. \`
+Based on the logLoss metric, we see that the Logistic Regression model
+is the **best performing** model, minimizing the log-loss metric
+compared to the other models tested. \`

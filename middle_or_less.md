@@ -24,9 +24,9 @@ diab <- read_csv("diabetes_binary_health_indicators_BRFSS2015.csv")
 ```
 
     ## Rows: 253680 Columns: 22
-    ## ── Column specification ───────────────────────────────────────────────────────────────────────────
+    ## ── Column specification ────────────────────────────────────────────────────────
     ## Delimiter: ","
-    ## dbl (22): Diabetes_binary, HighBP, HighChol, CholCheck, BMI, Smoker, Stroke, HeartDiseaseorAtta...
+    ## dbl (22): Diabetes_binary, HighBP, HighChol, CholCheck, BMI, Smoker, Stroke,...
     ## 
     ## ℹ Use `spec()` to retrieve the full column specification for this data.
     ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
@@ -75,7 +75,27 @@ diab <- diab %>% mutate(
 )
 
 diab_subset <- diab %>% filter(Education == params$Education)
+diab_subset
 ```
+
+    ## # A tibble: 4,217 × 22
+    ##    Diabetes_binary HighBP HighChol CholCheck   BMI Smoker Stroke
+    ##    <fct>           <fct>  <fct>    <fct>     <dbl> <fct>  <fct> 
+    ##  1 No_Diabetes     Yes    Yes      Yes          38 Yes    No    
+    ##  2 Diabetes        Yes    Yes      Yes          28 Yes    No    
+    ##  3 Diabetes        No     Yes      Yes          32 No     No    
+    ##  4 Diabetes        Yes    Yes      Yes          25 Yes    No    
+    ##  5 No_Diabetes     Yes    No       Yes          35 Yes    No    
+    ##  6 No_Diabetes     Yes    Yes      Yes          45 Yes    No    
+    ##  7 Diabetes        Yes    Yes      Yes          25 Yes    No    
+    ##  8 No_Diabetes     Yes    Yes      Yes          37 Yes    No    
+    ##  9 Diabetes        Yes    No       Yes          30 No     No    
+    ## 10 No_Diabetes     No     Yes      Yes          36 No     No    
+    ## # ℹ 4,207 more rows
+    ## # ℹ 15 more variables: HeartDiseaseorAttack <fct>, PhysActivity <fct>,
+    ## #   Fruits <fct>, Veggies <fct>, HvyAlcoholConsump <fct>, AnyHealthcare <fct>,
+    ## #   NoDocbcCost <fct>, GenHlth <fct>, MentHlth <fct>, PhysHlth <fct>,
+    ## #   DiffWalk <fct>, Sex <fct>, Age <fct>, Education <chr>, Income <fct>
 
 # Summarizations
 
@@ -133,31 +153,31 @@ cat_plots <- lapply(unique(cat_summ$name),
 grid.arrange(grobs = cat_plots[1:4], nCol = 2)
 ```
 
-![](middle_or_less_files/figure-gfm/unnamed-chunk-4-1.png)<!-- -->
+![](Middle_or_Less_files/figure-gfm/unnamed-chunk-4-1.png)<!-- -->
 
 ``` r
 grid.arrange(grobs = cat_plots[5:8], nCol = 2)
 ```
 
-![](middle_or_less_files/figure-gfm/unnamed-chunk-4-2.png)<!-- -->
+![](Middle_or_Less_files/figure-gfm/unnamed-chunk-4-2.png)<!-- -->
 
 ``` r
 grid.arrange(grobs = cat_plots[9:12], nCol = 2)
 ```
 
-![](middle_or_less_files/figure-gfm/unnamed-chunk-4-3.png)<!-- -->
+![](Middle_or_Less_files/figure-gfm/unnamed-chunk-4-3.png)<!-- -->
 
 ``` r
 grid.arrange(grobs = cat_plots[13:16], nCol = 2)
 ```
 
-![](middle_or_less_files/figure-gfm/unnamed-chunk-4-4.png)<!-- -->
+![](Middle_or_Less_files/figure-gfm/unnamed-chunk-4-4.png)<!-- -->
 
 ``` r
 grid.arrange(grobs = cat_plots[17:20], nCol = 2)
 ```
 
-![](middle_or_less_files/figure-gfm/unnamed-chunk-4-5.png)<!-- -->
+![](Middle_or_Less_files/figure-gfm/unnamed-chunk-4-5.png)<!-- -->
 
 ## Two-Way Contingency Tables
 
@@ -217,7 +237,7 @@ g + geom_bar(aes(fill = diab_subset$Diabetes_binary)) + theme_bw()
     ## Warning: Use of `diab_subset$HighChol` is discouraged.
     ## ℹ Use `HighChol` instead.
 
-![](middle_or_less_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
+![](Middle_or_Less_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
 
 ``` r
 g2 <-ggplot(data = diab_subset, aes(x= diab_subset$Fruits))
@@ -230,7 +250,7 @@ g2 + geom_bar(aes(fill= diab_subset$Diabetes_binary)) + theme_bw()
     ## Warning: Use of `diab_subset$Fruits` is discouraged.
     ## ℹ Use `Fruits` instead.
 
-![](middle_or_less_files/figure-gfm/unnamed-chunk-6-2.png)<!-- -->
+![](Middle_or_Less_files/figure-gfm/unnamed-chunk-6-2.png)<!-- -->
 
 ``` r
 g3 <- ggplot(data = diab_subset, aes(x = diab_subset$Age))
@@ -243,7 +263,7 @@ g3 + geom_bar(aes(fill = diab_subset$Age)) + theme_bw()
     ## Warning: Use of `diab_subset$Age` is discouraged.
     ## ℹ Use `Age` instead.
 
-![](middle_or_less_files/figure-gfm/unnamed-chunk-6-3.png)<!-- -->
+![](Middle_or_Less_files/figure-gfm/unnamed-chunk-6-3.png)<!-- -->
 
 # Modeling
 
@@ -674,6 +694,24 @@ fdaFit <- train(Diabetes_binary ~ .,
                       ))
 ```
 
+    ## Loading required package: earth
+
+    ## Warning: package 'earth' was built under R version 4.3.2
+
+    ## Loading required package: Formula
+
+    ## Loading required package: plotmo
+
+    ## Warning: package 'plotmo' was built under R version 4.3.2
+
+    ## Loading required package: plotrix
+
+    ## Warning: package 'plotrix' was built under R version 4.3.2
+
+    ## Loading required package: TeachingDemos
+
+    ## Warning: package 'TeachingDemos' was built under R version 4.3.2
+
 # Final Model Selection
 
 ## Predicting the Model on Test Set
@@ -1043,18 +1081,18 @@ names <- c("Logistic Regression",
 allResults
 ```
 
-    ##             Logistic Regression     LASSO Classification Tree Random Forest Naive Bayes
-    ## Accuracy              0.7365506 0.7365506           0.7310127     0.7341772   0.5569620
-    ## Sensitivity           0.1912568 0.1912568           0.2076503     0.2158470   0.8005464
-    ## Specificity           0.9587973 0.9587973           0.9443207     0.9454343   0.4576837
-    ## Kappa                 0.1898496 0.1898496           0.1886054     0.1997588   0.1934219
-    ## Log Loss              0.5261294 0.5256117           0.5896087     0.5287903   4.9761069
-    ##             Flexible Discriminant
-    ## Accuracy                0.7310127
-    ## Sensitivity             0.2076503
-    ## Specificity             0.9443207
-    ## Kappa                   0.1886054
-    ## Log Loss                0.5235338
+    ##             Logistic Regression     LASSO Classification Tree Random Forest
+    ## Accuracy              0.7365506 0.7365506           0.7310127     0.7341772
+    ## Sensitivity           0.1912568 0.1912568           0.2076503     0.2158470
+    ## Specificity           0.9587973 0.9587973           0.9443207     0.9454343
+    ## Kappa                 0.1898496 0.1898496           0.1886054     0.1997588
+    ## Log Loss              0.5261294 0.5256117           0.5896087     0.5287903
+    ##             Naive Bayes Flexible Discriminant
+    ## Accuracy      0.5569620             0.7310127
+    ## Sensitivity   0.8005464             0.2076503
+    ## Specificity   0.4576837             0.9443207
+    ## Kappa         0.1934219             0.1886054
+    ## Log Loss      4.9761069             0.5235338
 
 ## Final Model Declaration
 

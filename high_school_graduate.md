@@ -24,9 +24,9 @@ diab <- read_csv("diabetes_binary_health_indicators_BRFSS2015.csv")
 ```
 
     ## Rows: 253680 Columns: 22
-    ## ── Column specification ───────────────────────────────────────────────────────────────────────────
+    ## ── Column specification ───────────────────────────────────────────────────────────────
     ## Delimiter: ","
-    ## dbl (22): Diabetes_binary, HighBP, HighChol, CholCheck, BMI, Smoker, Stroke, HeartDiseaseorAtta...
+    ## dbl (22): Diabetes_binary, HighBP, HighChol, CholCheck, BMI, Smoker, Stroke, HeartD...
     ## 
     ## ℹ Use `spec()` to retrieve the full column specification for this data.
     ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
@@ -75,7 +75,27 @@ diab <- diab %>% mutate(
 )
 
 diab_subset <- diab %>% filter(Education == params$Education)
+diab_subset
 ```
+
+    ## # A tibble: 62,750 × 22
+    ##    Diabetes_binary HighBP HighChol CholCheck   BMI Smoker Stroke HeartDiseaseorAttack
+    ##    <fct>           <fct>  <fct>    <fct>     <dbl> <fct>  <fct>  <fct>               
+    ##  1 No_Diabetes     Yes    Yes      Yes          40 Yes    No     No                  
+    ##  2 No_Diabetes     Yes    Yes      Yes          28 No     No     No                  
+    ##  3 No_Diabetes     Yes    Yes      Yes          25 Yes    No     No                  
+    ##  4 No_Diabetes     No     No       Yes          24 No     No     No                  
+    ##  5 Diabetes        Yes    Yes      Yes          28 No     No     No                  
+    ##  6 No_Diabetes     Yes    Yes      Yes          21 No     No     No                  
+    ##  7 No_Diabetes     Yes    Yes      Yes          22 No     Yes    Yes                 
+    ##  8 No_Diabetes     Yes    Yes      Yes          28 Yes    No     No                  
+    ##  9 Diabetes        Yes    Yes      Yes          27 Yes    No     No                  
+    ## 10 No_Diabetes     No     No       Yes          23 No     No     No                  
+    ## # ℹ 62,740 more rows
+    ## # ℹ 14 more variables: PhysActivity <fct>, Fruits <fct>, Veggies <fct>,
+    ## #   HvyAlcoholConsump <fct>, AnyHealthcare <fct>, NoDocbcCost <fct>, GenHlth <fct>,
+    ## #   MentHlth <fct>, PhysHlth <fct>, DiffWalk <fct>, Sex <fct>, Age <fct>,
+    ## #   Education <chr>, Income <fct>
 
 # Summarizations
 
@@ -133,31 +153,31 @@ cat_plots <- lapply(unique(cat_summ$name),
 grid.arrange(grobs = cat_plots[1:4], nCol = 2)
 ```
 
-![](high_school_graduate_files/figure-gfm/unnamed-chunk-4-1.png)<!-- -->
+![](High_School_Graduate_files/figure-gfm/unnamed-chunk-4-1.png)<!-- -->
 
 ``` r
 grid.arrange(grobs = cat_plots[5:8], nCol = 2)
 ```
 
-![](high_school_graduate_files/figure-gfm/unnamed-chunk-4-2.png)<!-- -->
+![](High_School_Graduate_files/figure-gfm/unnamed-chunk-4-2.png)<!-- -->
 
 ``` r
 grid.arrange(grobs = cat_plots[9:12], nCol = 2)
 ```
 
-![](high_school_graduate_files/figure-gfm/unnamed-chunk-4-3.png)<!-- -->
+![](High_School_Graduate_files/figure-gfm/unnamed-chunk-4-3.png)<!-- -->
 
 ``` r
 grid.arrange(grobs = cat_plots[13:16], nCol = 2)
 ```
 
-![](high_school_graduate_files/figure-gfm/unnamed-chunk-4-4.png)<!-- -->
+![](High_School_Graduate_files/figure-gfm/unnamed-chunk-4-4.png)<!-- -->
 
 ``` r
 grid.arrange(grobs = cat_plots[17:20], nCol = 2)
 ```
 
-![](high_school_graduate_files/figure-gfm/unnamed-chunk-4-5.png)<!-- -->
+![](High_School_Graduate_files/figure-gfm/unnamed-chunk-4-5.png)<!-- -->
 
 ## Two-Way Contingency Tables
 
@@ -176,9 +196,9 @@ tab
 ```
 
     ##              
-    ##                 No  Yes
-    ##   No_Diabetes 1247 1740
-    ##   Diabetes     538  692
+    ##                  No   Yes
+    ##   No_Diabetes 22019 29665
+    ##   Diabetes     4992  6074
 
 ``` r
 tab1 <- table(diab_subset$Diabetes_binary,
@@ -187,9 +207,9 @@ tab1
 ```
 
     ##              
-    ##                 No  Yes
-    ##   No_Diabetes 1611 1376
-    ##   Diabetes     354  876
+    ##                  No   Yes
+    ##   No_Diabetes 30169 21515
+    ##   Diabetes     3620  7446
 
 ``` r
 tab2 <- table(diab_subset$Diabetes_binary,
@@ -217,7 +237,7 @@ g + geom_bar(aes(fill = diab_subset$Diabetes_binary)) + theme_bw()
     ## Warning: Use of `diab_subset$HighChol` is discouraged.
     ## ℹ Use `HighChol` instead.
 
-![](high_school_graduate_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
+![](High_School_Graduate_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
 
 ``` r
 g2 <-ggplot(data = diab_subset, aes(x= diab_subset$Fruits))
@@ -230,7 +250,7 @@ g2 + geom_bar(aes(fill= diab_subset$Diabetes_binary)) + theme_bw()
     ## Warning: Use of `diab_subset$Fruits` is discouraged.
     ## ℹ Use `Fruits` instead.
 
-![](high_school_graduate_files/figure-gfm/unnamed-chunk-6-2.png)<!-- -->
+![](High_School_Graduate_files/figure-gfm/unnamed-chunk-6-2.png)<!-- -->
 
 ``` r
 g3 <- ggplot(data = diab_subset, aes(x = diab_subset$Age))
@@ -243,7 +263,7 @@ g3 + geom_bar(aes(fill = diab_subset$Age)) + theme_bw()
     ## Warning: Use of `diab_subset$Age` is discouraged.
     ## ℹ Use `Age` instead.
 
-![](high_school_graduate_files/figure-gfm/unnamed-chunk-6-3.png)<!-- -->
+![](High_School_Graduate_files/figure-gfm/unnamed-chunk-6-3.png)<!-- -->
 
 # Modeling
 
@@ -440,10 +460,10 @@ logregResults <- rbind(
 logregResults
 ```
 
-    ##   alpha     lambda   logLoss  logLossSD
-    ## 6  0.55 0.02290443 0.5261294 0.01248147
-    ## 9  1.00 0.01690926 0.5685430 0.01036535
-    ## 3  0.10 0.02002108 0.5515378 0.01134340
+    ##   alpha       lambda   logLoss   logLossSD
+    ## 7  1.00 0.0001847199 0.3857067 0.004552369
+    ## 5  0.55 0.0012933118 0.4278237 0.004046841
+    ## 1  0.10 0.0001607404 0.4152552 0.003139493
 
 ``` r
 candidateLRModel <- list(logreg1, logreg2, logreg3)[[which.min(logregResults[,3])]]
@@ -474,8 +494,8 @@ of parameters used) that resulted in the best fit are given below.
 lassoFit$bestTune
 ```
 
-    ##   alpha     lambda
-    ## 6  0.55 0.02290443
+    ##   alpha       lambda
+    ## 7     1 0.0001847199
 
 ### Classification Tree Model
 
@@ -502,8 +522,8 @@ below.
 lassoFit$bestTune
 ```
 
-    ##   alpha     lambda
-    ## 6  0.55 0.02290443
+    ##   alpha       lambda
+    ## 7     1 0.0001847199
 
 ### Random Forest Model
 
@@ -596,7 +616,7 @@ rfFit$bestTune
 ```
 
     ##   mtry
-    ## 5   10
+    ## 6   15
 
 ### “New” Models
 
@@ -703,29 +723,50 @@ confMatLR
     ## Confusion Matrix and Statistics
     ## 
     ##           Reference
-    ## Prediction   0   1
-    ##          0 861 296
-    ##          1  37  70
-    ##                                           
-    ##                Accuracy : 0.7366          
-    ##                  95% CI : (0.7113, 0.7607)
-    ##     No Information Rate : 0.7104          
-    ##     P-Value [Acc > NIR] : 0.0212          
-    ##                                           
-    ##                   Kappa : 0.1898          
-    ##                                           
-    ##  Mcnemar's Test P-Value : <2e-16          
-    ##                                           
-    ##             Sensitivity : 0.19126         
-    ##             Specificity : 0.95880         
-    ##          Pos Pred Value : 0.65421         
-    ##          Neg Pred Value : 0.74417         
-    ##              Prevalence : 0.28956         
-    ##          Detection Rate : 0.05538         
-    ##    Detection Prevalence : 0.08465         
-    ##       Balanced Accuracy : 0.57503         
-    ##                                           
-    ##        'Positive' Class : 1               
+    ## Prediction     0     1
+    ##          0 15115  2837
+    ##          1   384   488
+    ##                          
+    ##                Accuracy :
+    ##                  95% CI :
+    ##     No Information Rate :
+    ##     P-Value [Acc > NIR] :
+    ##                          
+    ##                   Kappa :
+    ##                          
+    ##  Mcnemar's Test P-Value :
+    ##                          
+    ##             Sensitivity :
+    ##             Specificity :
+    ##          Pos Pred Value :
+    ##          Neg Pred Value :
+    ##              Prevalence :
+    ##          Detection Rate :
+    ##    Detection Prevalence :
+    ##       Balanced Accuracy :
+    ##                          
+    ##        'Positive' Class :
+    ##                          
+    ##                  
+    ##  0.8289          
+    ##  (0.8234, 0.8342)
+    ##  0.8234          
+    ##  0.02362         
+    ##                  
+    ##  0.1718          
+    ##                  
+    ##  < 2e-16         
+    ##                  
+    ##  0.14677         
+    ##  0.97522         
+    ##  0.55963         
+    ##  0.84197         
+    ##  0.17664         
+    ##  0.02592         
+    ##  0.04632         
+    ##  0.56100         
+    ##                  
+    ##  1               
     ## 
 
 Consider the accuracy, sensitivity, and specificity (among other related
@@ -760,29 +801,50 @@ confMatLASSO
     ## Confusion Matrix and Statistics
     ## 
     ##           Reference
-    ## Prediction   0   1
-    ##          0 861 296
-    ##          1  37  70
-    ##                                           
-    ##                Accuracy : 0.7366          
-    ##                  95% CI : (0.7113, 0.7607)
-    ##     No Information Rate : 0.7104          
-    ##     P-Value [Acc > NIR] : 0.0212          
-    ##                                           
-    ##                   Kappa : 0.1898          
-    ##                                           
-    ##  Mcnemar's Test P-Value : <2e-16          
-    ##                                           
-    ##             Sensitivity : 0.19126         
-    ##             Specificity : 0.95880         
-    ##          Pos Pred Value : 0.65421         
-    ##          Neg Pred Value : 0.74417         
-    ##              Prevalence : 0.28956         
-    ##          Detection Rate : 0.05538         
-    ##    Detection Prevalence : 0.08465         
-    ##       Balanced Accuracy : 0.57503         
-    ##                                           
-    ##        'Positive' Class : 1               
+    ## Prediction     0     1
+    ##          0 15115  2837
+    ##          1   384   488
+    ##                          
+    ##                Accuracy :
+    ##                  95% CI :
+    ##     No Information Rate :
+    ##     P-Value [Acc > NIR] :
+    ##                          
+    ##                   Kappa :
+    ##                          
+    ##  Mcnemar's Test P-Value :
+    ##                          
+    ##             Sensitivity :
+    ##             Specificity :
+    ##          Pos Pred Value :
+    ##          Neg Pred Value :
+    ##              Prevalence :
+    ##          Detection Rate :
+    ##    Detection Prevalence :
+    ##       Balanced Accuracy :
+    ##                          
+    ##        'Positive' Class :
+    ##                          
+    ##                  
+    ##  0.8289          
+    ##  (0.8234, 0.8342)
+    ##  0.8234          
+    ##  0.02362         
+    ##                  
+    ##  0.1718          
+    ##                  
+    ##  < 2e-16         
+    ##                  
+    ##  0.14677         
+    ##  0.97522         
+    ##  0.55963         
+    ##  0.84197         
+    ##  0.17664         
+    ##  0.02592         
+    ##  0.04632         
+    ##  0.56100         
+    ##                  
+    ##  1               
     ## 
 
 Consider the accuracy, sensitivity, and specificity (among other related
@@ -817,29 +879,50 @@ confMatCT
     ## Confusion Matrix and Statistics
     ## 
     ##           Reference
-    ## Prediction   0   1
-    ##          0 848 290
-    ##          1  50  76
-    ##                                           
-    ##                Accuracy : 0.731           
-    ##                  95% CI : (0.7057, 0.7553)
-    ##     No Information Rate : 0.7104          
-    ##     P-Value [Acc > NIR] : 0.05612         
-    ##                                           
-    ##                   Kappa : 0.1886          
-    ##                                           
-    ##  Mcnemar's Test P-Value : < 2e-16         
-    ##                                           
-    ##             Sensitivity : 0.20765         
-    ##             Specificity : 0.94432         
-    ##          Pos Pred Value : 0.60317         
-    ##          Neg Pred Value : 0.74517         
-    ##              Prevalence : 0.28956         
-    ##          Detection Rate : 0.06013         
-    ##    Detection Prevalence : 0.09968         
-    ##       Balanced Accuracy : 0.57599         
-    ##                                           
-    ##        'Positive' Class : 1               
+    ## Prediction     0     1
+    ##          0 15325  3061
+    ##          1   174   264
+    ##                          
+    ##                Accuracy :
+    ##                  95% CI :
+    ##     No Information Rate :
+    ##     P-Value [Acc > NIR] :
+    ##                          
+    ##                   Kappa :
+    ##                          
+    ##  Mcnemar's Test P-Value :
+    ##                          
+    ##             Sensitivity :
+    ##             Specificity :
+    ##          Pos Pred Value :
+    ##          Neg Pred Value :
+    ##              Prevalence :
+    ##          Detection Rate :
+    ##    Detection Prevalence :
+    ##       Balanced Accuracy :
+    ##                          
+    ##        'Positive' Class :
+    ##                          
+    ##                  
+    ##  0.8281          
+    ##  (0.8227, 0.8335)
+    ##  0.8234          
+    ##  0.04321         
+    ##                  
+    ##  0.1034          
+    ##                  
+    ##  < 2e-16         
+    ##                  
+    ##  0.07940         
+    ##  0.98877         
+    ##  0.60274         
+    ##  0.83351         
+    ##  0.17664         
+    ##  0.01402         
+    ##  0.02327         
+    ##  0.53409         
+    ##                  
+    ##  1               
     ## 
 
 Consider the accuracy, sensitivity, and specificity (among other related
@@ -873,29 +956,50 @@ confMatRF
     ## Confusion Matrix and Statistics
     ## 
     ##           Reference
-    ## Prediction   0   1
-    ##          0 849 287
-    ##          1  49  79
-    ##                                           
-    ##                Accuracy : 0.7342          
-    ##                  95% CI : (0.7089, 0.7584)
-    ##     No Information Rate : 0.7104          
-    ##     P-Value [Acc > NIR] : 0.03287         
-    ##                                           
-    ##                   Kappa : 0.1998          
-    ##                                           
-    ##  Mcnemar's Test P-Value : < 2e-16         
-    ##                                           
-    ##             Sensitivity : 0.2158          
-    ##             Specificity : 0.9454          
-    ##          Pos Pred Value : 0.6172          
-    ##          Neg Pred Value : 0.7474          
-    ##              Prevalence : 0.2896          
-    ##          Detection Rate : 0.0625          
-    ##    Detection Prevalence : 0.1013          
-    ##       Balanced Accuracy : 0.5806          
-    ##                                           
-    ##        'Positive' Class : 1               
+    ## Prediction     0     1
+    ##          0 15110  2843
+    ##          1   389   482
+    ##                          
+    ##                Accuracy :
+    ##                  95% CI :
+    ##     No Information Rate :
+    ##     P-Value [Acc > NIR] :
+    ##                          
+    ##                   Kappa :
+    ##                          
+    ##  Mcnemar's Test P-Value :
+    ##                          
+    ##             Sensitivity :
+    ##             Specificity :
+    ##          Pos Pred Value :
+    ##          Neg Pred Value :
+    ##              Prevalence :
+    ##          Detection Rate :
+    ##    Detection Prevalence :
+    ##       Balanced Accuracy :
+    ##                          
+    ##        'Positive' Class :
+    ##                          
+    ##                  
+    ##  0.8283          
+    ##  (0.8228, 0.8337)
+    ##  0.8234          
+    ##  0.03817         
+    ##                  
+    ##  0.1688          
+    ##                  
+    ##  < 2e-16         
+    ##                  
+    ##  0.14496         
+    ##  0.97490         
+    ##  0.55339         
+    ##  0.84164         
+    ##  0.17664         
+    ##  0.02561         
+    ##  0.04627         
+    ##  0.55993         
+    ##                  
+    ##  1               
     ## 
 
 Consider the accuracy, sensitivity, and specificity (among other related
@@ -929,29 +1033,50 @@ confMatNBC
     ## Confusion Matrix and Statistics
     ## 
     ##           Reference
-    ## Prediction   0   1
-    ##          0 411  73
-    ##          1 487 293
-    ##                                           
-    ##                Accuracy : 0.557           
-    ##                  95% CI : (0.5291, 0.5846)
-    ##     No Information Rate : 0.7104          
-    ##     P-Value [Acc > NIR] : 1               
-    ##                                           
-    ##                   Kappa : 0.1934          
-    ##                                           
-    ##  Mcnemar's Test P-Value : <2e-16          
-    ##                                           
-    ##             Sensitivity : 0.8005          
-    ##             Specificity : 0.4577          
-    ##          Pos Pred Value : 0.3756          
-    ##          Neg Pred Value : 0.8492          
-    ##              Prevalence : 0.2896          
-    ##          Detection Rate : 0.2318          
-    ##    Detection Prevalence : 0.6171          
-    ##       Balanced Accuracy : 0.6291          
-    ##                                           
-    ##        'Positive' Class : 1               
+    ## Prediction    0    1
+    ##          0 8222  648
+    ##          1 7277 2677
+    ##                          
+    ##                Accuracy :
+    ##                  95% CI :
+    ##     No Information Rate :
+    ##     P-Value [Acc > NIR] :
+    ##                          
+    ##                   Kappa :
+    ##                          
+    ##  Mcnemar's Test P-Value :
+    ##                          
+    ##             Sensitivity :
+    ##             Specificity :
+    ##          Pos Pred Value :
+    ##          Neg Pred Value :
+    ##              Prevalence :
+    ##          Detection Rate :
+    ##    Detection Prevalence :
+    ##       Balanced Accuracy :
+    ##                          
+    ##        'Positive' Class :
+    ##                          
+    ##                  
+    ##  0.579           
+    ##  (0.5719, 0.5861)
+    ##  0.8234          
+    ##  1               
+    ##                  
+    ##  0.1882          
+    ##                  
+    ##  <2e-16          
+    ##                  
+    ##  0.8051          
+    ##  0.5305          
+    ##  0.2689          
+    ##  0.9269          
+    ##  0.1766          
+    ##  0.1422          
+    ##  0.5288          
+    ##  0.6678          
+    ##                  
+    ##  1               
     ## 
 
 ``` r
@@ -982,29 +1107,50 @@ confMatFDA
     ## Confusion Matrix and Statistics
     ## 
     ##           Reference
-    ## Prediction   0   1
-    ##          0 848 290
-    ##          1  50  76
-    ##                                           
-    ##                Accuracy : 0.731           
-    ##                  95% CI : (0.7057, 0.7553)
-    ##     No Information Rate : 0.7104          
-    ##     P-Value [Acc > NIR] : 0.05612         
-    ##                                           
-    ##                   Kappa : 0.1886          
-    ##                                           
-    ##  Mcnemar's Test P-Value : < 2e-16         
-    ##                                           
-    ##             Sensitivity : 0.20765         
-    ##             Specificity : 0.94432         
-    ##          Pos Pred Value : 0.60317         
-    ##          Neg Pred Value : 0.74517         
-    ##              Prevalence : 0.28956         
-    ##          Detection Rate : 0.06013         
-    ##    Detection Prevalence : 0.09968         
-    ##       Balanced Accuracy : 0.57599         
-    ##                                           
-    ##        'Positive' Class : 1               
+    ## Prediction     0     1
+    ##          0 15325  3061
+    ##          1   174   264
+    ##                          
+    ##                Accuracy :
+    ##                  95% CI :
+    ##     No Information Rate :
+    ##     P-Value [Acc > NIR] :
+    ##                          
+    ##                   Kappa :
+    ##                          
+    ##  Mcnemar's Test P-Value :
+    ##                          
+    ##             Sensitivity :
+    ##             Specificity :
+    ##          Pos Pred Value :
+    ##          Neg Pred Value :
+    ##              Prevalence :
+    ##          Detection Rate :
+    ##    Detection Prevalence :
+    ##       Balanced Accuracy :
+    ##                          
+    ##        'Positive' Class :
+    ##                          
+    ##                  
+    ##  0.8281          
+    ##  (0.8227, 0.8335)
+    ##  0.8234          
+    ##  0.04321         
+    ##                  
+    ##  0.1034          
+    ##                  
+    ##  < 2e-16         
+    ##                  
+    ##  0.07940         
+    ##  0.98877         
+    ##  0.60274         
+    ##  0.83351         
+    ##  0.17664         
+    ##  0.01402         
+    ##  0.02327         
+    ##  0.53409         
+    ##                  
+    ##  1               
     ## 
 
 ``` r
@@ -1043,21 +1189,39 @@ names <- c("Logistic Regression",
 allResults
 ```
 
-    ##             Logistic Regression     LASSO Classification Tree Random Forest Naive Bayes
-    ## Accuracy              0.7365506 0.7365506           0.7310127     0.7341772   0.5569620
-    ## Sensitivity           0.1912568 0.1912568           0.2076503     0.2158470   0.8005464
-    ## Specificity           0.9587973 0.9587973           0.9443207     0.9454343   0.4576837
-    ## Kappa                 0.1898496 0.1898496           0.1886054     0.1997588   0.1934219
-    ## Log Loss              0.5261294 0.5256117           0.5896087     0.5287903   4.9761069
+    ##             Logistic Regression
+    ## Accuracy              0.8288887
+    ## Sensitivity           0.1467669
+    ## Specificity           0.9752242
+    ## Kappa                 0.1717551
+    ## Log Loss              0.3857067
+    ##                 LASSO
+    ## Accuracy    0.8288887
+    ## Sensitivity 0.1467669
+    ## Specificity 0.9752242
+    ## Kappa       0.1717551
+    ## Log Loss    0.3857207
+    ##             Classification Tree
+    ## Accuracy              0.8281449
+    ## Sensitivity           0.0793985
+    ## Specificity           0.9887735
+    ## Kappa                 0.1034476
+    ## Log Loss              0.4230614
+    ##             Random Forest Naive Bayes
+    ## Accuracy        0.8283043   0.5789949
+    ## Sensitivity     0.1449624   0.8051128
+    ## Specificity     0.9749016   0.5304858
+    ## Kappa           0.1687884   0.1882224
+    ## Log Loss        0.4215860   4.6834305
     ##             Flexible Discriminant
-    ## Accuracy                0.7310127
-    ## Sensitivity             0.2076503
-    ## Specificity             0.9443207
-    ## Kappa                   0.1886054
-    ## Log Loss                0.5235338
+    ## Accuracy                0.8281449
+    ## Sensitivity             0.0793985
+    ## Specificity             0.9887735
+    ## Kappa                   0.1034476
+    ## Log Loss                0.3910200
 
 ## Final Model Declaration
 
-Based on the logLoss metric, we see that the FDA model is the **best
-performing** model, minimizing the log-loss metric compared to the other
-models tested. \`
+Based on the logLoss metric, we see that the Logistic Regression model
+is the **best performing** model, minimizing the log-loss metric
+compared to the other models tested. \`

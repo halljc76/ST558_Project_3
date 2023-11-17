@@ -5,6 +5,8 @@ date: "2023-11-05"
 output: 
   github_document:
     html_preview: false
+params:
+  Education: "x"
 ---
 
 ```{r include=FALSE}
@@ -74,6 +76,7 @@ diab <- diab %>% mutate(
 )
 
 diab_subset <- diab %>% filter(Education == params$Education)
+diab_subset
 ```
 
 
