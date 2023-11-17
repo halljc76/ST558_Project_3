@@ -8,14 +8,15 @@ The purpose of this repository is to serve as a central hub for our analysis on 
 
 ### `R` Packages Used For Analysis
 
-`library(readr)`
-`library(dplyr)`
-`library(tidyr)`
-`library(ggplot2)`
-`library(caret)`
-`library(cowplot)`
-`library(gridExtra)`
-`library(caret)`
+- `library(readr)` 
+- `library(dplyr)`  
+- `library(tidyr)`  
+- `library(ggplot2)`  
+- `library(caret)`  
+- `library(cowplot)`  
+- `library(gridExtra)`  
+- `library(caret)`  
+
 
 ### Code for Reproducibility
 
